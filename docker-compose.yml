@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pasteleria
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init_databases.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - pasteleria-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "9097:9097"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_users
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - pasteleria-network
+
+  cliente-service:
+    build: ./cliente-service
+    ports:
+      - "9091:9091"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_cliente
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - pasteleria-network
+
+  producto-service:
+    build: ./producto-service
+    ports:
+      - "9093:9093"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_producto
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - pasteleria-network
+
+  pedido-service:
+    build: ./pedido-service
+    ports:
+      - "9094:9094"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_pedidos
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - pasteleria-network
+
+  inventario-service:
+    build: ./inventario-service
+    ports:
+      - "9095:9095"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_inventario
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - pasteleria-network
+
+  envio-service:
+    build: ./envio-service
+    ports:
+      - "9096:9096"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_envio
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - pasteleria-network
+
+  ingrediente-service:
+    build: ./ingrediente-service
+    ports:
+      - "9098:9098"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_ingrediente
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - pasteleria-network
+
+  proveedor-service:
+    build: ./proveedor-service
+    ports:
+      - "9099:9099"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_proveedor
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - pasteleria-network
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "9090:9090"
+    depends_on:
+      - auth-service
+      - cliente-service
+      - producto-service
+      - pedido-service
+      - inventario-service
+      - envio-service
+      - ingrediente-service
+      - proveedor-service
+    networks:
+      - pasteleria-network
+
+volumes:
+  mysql_data:
+
+networks:
+  pasteleria-network:
+    driver: bridge

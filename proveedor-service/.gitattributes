@@ -1,0 +1,4 @@
+* text=auto
+*.class -text
+*.jar -text
+*.gitignore export-ignore
