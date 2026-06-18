@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: auth-service
+  profiles:
+    active: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/bd_users?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+
+server:
+  port: 9097
+
+logging:
+  level:
+    com.example.auth: DEBUG
+  file:
+    name: logs/auth-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:mysql://host.docker.internal:3306/bd_users?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+server:
+  port: 9097
+
+logging:
+  level:
+    com.example.auth: INFO
+  file:
+    name: logs/auth-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html
