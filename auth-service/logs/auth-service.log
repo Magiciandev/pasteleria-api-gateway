@@ -1,0 +1,97 @@
+2026-06-19T23:01:16.663-04:00  INFO 28016 --- [auth] [main] com.example.auth.DemoApplicationTests    : Starting DemoApplicationTests using Java 24.0.2 with PID 28016 (started by Max in C:\Users\Max\Desktop\pasteleria\auth-service)
+2026-06-19T23:01:16.676-04:00 DEBUG 28016 --- [auth] [main] com.example.auth.DemoApplicationTests    : Running with Spring Boot v4.0.5, Spring v7.0.6
+2026-06-19T23:01:16.677-04:00  INFO 28016 --- [auth] [main] com.example.auth.DemoApplicationTests    : The following 1 profile is active: "dev"
+2026-06-19T23:01:18.771-04:00  INFO 28016 --- [auth] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-19T23:01:18.871-04:00  INFO 28016 --- [auth] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 83 ms. Found 1 JPA repository interface.
+2026-06-19T23:01:19.960-04:00  INFO 28016 --- [auth] [main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-06-19T23:01:20.088-04:00  INFO 28016 --- [auth] [main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-06-19T23:01:21.180-04:00  INFO 28016 --- [auth] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-19T23:01:21.280-04:00  INFO 28016 --- [auth] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-19T23:01:21.711-04:00  INFO 28016 --- [auth] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@58620d12
+2026-06-19T23:01:21.714-04:00  INFO 28016 --- [auth] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-19T23:01:21.837-04:00  WARN 28016 --- [auth] [main] org.hibernate.orm.core                   : HHH000511: The 5.5.5 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-19T23:01:21.880-04:00  INFO 28016 --- [auth] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/bd_users?createDatabaseIfNotExist=true]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 5.5.5
+	Default catalog/schema: bd_users/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-19T23:01:23.602-04:00  INFO 28016 --- [auth] [main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-19T23:01:23.683-04:00  INFO 28016 --- [auth] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-19T23:01:23.830-04:00  INFO 28016 --- [auth] [main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-19T23:01:25.844-04:00  INFO 28016 --- [auth] [main] com.example.auth.DemoApplicationTests    : Started DemoApplicationTests in 10.069 seconds (process running for 13.273)
+2026-06-19T23:01:25.852-04:00  WARN 28016 --- [auth] [main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-06-19T23:01:25.852-04:00  WARN 28016 --- [auth] [main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /doc/swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-06-19T23:01:27.183-04:00  INFO 28016 --- [auth] [main] com.example.auth.service.UserService     : Intento de login: email=juan@mail.com
+2026-06-19T23:01:27.184-04:00  INFO 28016 --- [auth] [main] com.example.auth.service.UserService     : Login exitoso: email=juan@mail.com
+2026-06-19T23:01:27.235-04:00  INFO 28016 --- [auth] [main] com.example.auth.service.UserService     : Intento de login: email=juan@mail.com
+2026-06-19T23:01:27.236-04:00  WARN 28016 --- [auth] [main] com.example.auth.service.UserService     : Login fallido - credenciales incorrectas: email=juan@mail.com
+2026-06-19T23:01:27.249-04:00  INFO 28016 --- [auth] [main] com.example.auth.service.UserService     : Intento de login: email=noexiste@mail.com
+2026-06-19T23:01:27.250-04:00  WARN 28016 --- [auth] [main] com.example.auth.service.UserService     : Login fallido - usuario no encontrado: email=noexiste@mail.com
+2026-06-19T23:01:27.267-04:00  INFO 28016 --- [auth] [main] com.example.auth.service.UserService     : Registrando usuario: email=nuevo@mail.com
+2026-06-19T23:01:27.268-04:00  INFO 28016 --- [auth] [main] com.example.auth.service.UserService     : Usuario registrado exitosamente: email=nuevo@mail.com
+2026-06-19T23:01:27.276-04:00  INFO 28016 --- [auth] [main] com.example.auth.service.UserService     : Registrando usuario: email=juan@mail.com
+2026-06-19T23:01:27.277-04:00  WARN 28016 --- [auth] [main] com.example.auth.service.UserService     : Registro fallido - usuario ya existe: email=juan@mail.com
+2026-06-19T23:01:27.329-04:00  INFO 28016 --- [auth] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-19T23:01:27.657-04:00  INFO 28016 --- [auth] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-06-19T23:01:27.681-04:00  INFO 28016 --- [auth] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-06-19T23:17:28.911-04:00  INFO 5764 --- [auth] [restartedMain] com.example.auth.DemoApplication         : Starting DemoApplication using Java 24.0.2 with PID 5764 (C:\Users\Max\Desktop\pasteleria\auth-service\target\classes started by Max in C:\Users\Max\Desktop\pasteleria\auth-service)
+2026-06-19T23:17:28.914-04:00 DEBUG 5764 --- [auth] [restartedMain] com.example.auth.DemoApplication         : Running with Spring Boot v4.0.5, Spring v7.0.6
+2026-06-19T23:17:28.915-04:00  INFO 5764 --- [auth] [restartedMain] com.example.auth.DemoApplication         : The following 1 profile is active: "dev"
+2026-06-19T23:17:28.974-04:00  INFO 5764 --- [auth] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-06-19T23:17:28.975-04:00  INFO 5764 --- [auth] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-06-19T23:17:30.008-04:00  INFO 5764 --- [auth] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-19T23:17:30.067-04:00  INFO 5764 --- [auth] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 49 ms. Found 1 JPA repository interface.
+2026-06-19T23:17:30.713-04:00  INFO 5764 --- [auth] [restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9097 (http)
+2026-06-19T23:17:30.734-04:00  INFO 5764 --- [auth] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-19T23:17:30.734-04:00  INFO 5764 --- [auth] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-06-19T23:17:30.786-04:00  INFO 5764 --- [auth] [restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1810 ms
+2026-06-19T23:17:30.988-04:00  INFO 5764 --- [auth] [restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-06-19T23:17:31.054-04:00  INFO 5764 --- [auth] [restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-06-19T23:17:31.618-04:00  INFO 5764 --- [auth] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-19T23:17:31.661-04:00  INFO 5764 --- [auth] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-19T23:17:32.424-04:00  INFO 5764 --- [auth] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@49bd0415
+2026-06-19T23:17:32.426-04:00  INFO 5764 --- [auth] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-19T23:17:32.491-04:00  WARN 5764 --- [auth] [restartedMain] org.hibernate.orm.core                   : HHH000511: The 5.5.5 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-19T23:17:32.518-04:00  INFO 5764 --- [auth] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/bd_users?createDatabaseIfNotExist=true]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 5.5.5
+	Default catalog/schema: bd_users/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-19T23:17:33.529-04:00  INFO 5764 --- [auth] [restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-19T23:17:33.612-04:00  INFO 5764 --- [auth] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-19T23:17:33.717-04:00  INFO 5764 --- [auth] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-19T23:17:34.985-04:00  WARN 5764 --- [auth] [restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-06-19T23:17:34.988-04:00  INFO 5764 --- [auth] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-19T23:17:34.994-04:00  INFO 5764 --- [auth] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-06-19T23:17:35.008-04:00  INFO 5764 --- [auth] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-06-19T23:17:35.022-04:00  INFO 5764 --- [auth] [restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-06-19T23:17:35.045-04:00 ERROR 5764 --- [auth] [restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9097 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9097 or configure this application to listen on another port.
+

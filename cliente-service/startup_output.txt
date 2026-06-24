@@ -1,0 +1,102 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.example:cliente-service >---------------------
+[INFO] Building  0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:4.0.5:run (default-cli) > test-compile @ cliente-service >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ cliente-service ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ cliente-service ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 7 source files with javac [debug parameters release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ cliente-service ---
+[INFO] skip non existing resourceDirectory C:\Users\vnava\Desktop\Ejemplo-Gateway-JWT(2)\Ejemplo-Gateway-JWT(1)\Ejemplo-Gateway-JWT\Ejemplo-Gateway\cliente-service\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ cliente-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:4.0.5:run (default-cli) < test-compile @ cliente-service <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:4.0.5:run (default-cli) @ cliente-service ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-05-15T13:08:42.434-04:00  INFO 10040 --- [cliente-service] [  restartedMain] c.e.c.ClienteServiceApplication          : Starting ClienteServiceApplication using Java 21.0.10 with PID 10040 (C:\Users\vnava\Desktop\Ejemplo-Gateway-JWT(2)\Ejemplo-Gateway-JWT(1)\Ejemplo-Gateway-JWT\Ejemplo-Gateway\cliente-service\target\classes started by vnava in C:\Users\vnava\Desktop\Ejemplo-Gateway-JWT(2)\Ejemplo-Gateway-JWT(1)\Ejemplo-Gateway-JWT\Ejemplo-Gateway\cliente-service)
+2026-05-15T13:08:42.441-04:00 DEBUG 10040 --- [cliente-service] [  restartedMain] c.e.c.ClienteServiceApplication          : Running with Spring Boot v4.0.5, Spring v7.0.6
+2026-05-15T13:08:42.441-04:00  INFO 10040 --- [cliente-service] [  restartedMain] c.e.c.ClienteServiceApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-05-15T13:08:42.551-04:00  INFO 10040 --- [cliente-service] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-05-15T13:08:42.551-04:00  INFO 10040 --- [cliente-service] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-05-15T13:08:44.745-04:00  INFO 10040 --- [cliente-service] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-15T13:08:45.064-04:00  INFO 10040 --- [cliente-service] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 308 ms. Found 1 JPA repository interface.
+2026-05-15T13:08:45.645-04:00  INFO 10040 --- [cliente-service] [  restartedMain] o.s.cloud.context.scope.GenericScope     : BeanFactory id=2f5ab263-b98c-30ce-b6ba-ee86919ab6aa
+2026-05-15T13:08:46.770-04:00  INFO 10040 --- [cliente-service] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 9091 (http)
+2026-05-15T13:08:46.803-04:00  INFO 10040 --- [cliente-service] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-15T13:08:46.803-04:00  INFO 10040 --- [cliente-service] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-05-15T13:08:46.937-04:00  INFO 10040 --- [cliente-service] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 4386 ms
+2026-05-15T13:08:47.720-04:00  INFO 10040 --- [cliente-service] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-05-15T13:08:47.854-04:00  INFO 10040 --- [cliente-service] [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-05-15T13:08:49.054-04:00  INFO 10040 --- [cliente-service] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-15T13:08:49.139-04:00  INFO 10040 --- [cliente-service] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-15T13:08:49.521-04:00  INFO 10040 --- [cliente-service] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@757181b6
+2026-05-15T13:08:49.521-04:00  INFO 10040 --- [cliente-service] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-15T13:08:49.638-04:00  WARN 10040 --- [cliente-service] [  restartedMain] org.hibernate.orm.core                   : HHH000511: The 5.5.5 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-05-15T13:08:49.688-04:00  INFO 10040 --- [cliente-service] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/bd_cliente?createDatabaseIfNotExist=true]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 5.5.5
+	Default catalog/schema: bd_cliente/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-05-15T13:08:51.629-04:00  INFO 10040 --- [cliente-service] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-15T13:08:51.816-04:00  INFO 10040 --- [cliente-service] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-15T13:08:52.007-04:00  INFO 10040 --- [cliente-service] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-15T13:08:52.355-04:00  WARN 10040 --- [cliente-service] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'clienteController' defined in file [C:\Users\vnava\Desktop\Ejemplo-Gateway-JWT(2)\Ejemplo-Gateway-JWT(1)\Ejemplo-Gateway-JWT\Ejemplo-Gateway\cliente-service\target\classes\com\example\cliente_service\controller\ClienteController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'clienteService' defined in file [C:\Users\vnava\Desktop\Ejemplo-Gateway-JWT(2)\Ejemplo-Gateway-JWT(1)\Ejemplo-Gateway-JWT\Ejemplo-Gateway\cliente-service\target\classes\com\example\cliente_service\service\ClienteService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'org.springframework.web.reactive.function.client.WebClient$Builder' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2026-05-15T13:08:52.355-04:00  INFO 10040 --- [cliente-service] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-15T13:08:52.372-04:00  INFO 10040 --- [cliente-service] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-05-15T13:08:52.380-04:00  INFO 10040 --- [cliente-service] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-05-15T13:08:52.389-04:00  INFO 10040 --- [cliente-service] [  restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-05-15T13:08:52.405-04:00  INFO 10040 --- [cliente-service] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-15T13:08:52.455-04:00 ERROR 10040 --- [cliente-service] [  restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 1 of constructor in com.example.cliente_service.service.ClienteService required a bean of type 'org.springframework.web.reactive.function.client.WebClient$Builder' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'org.springframework.web.reactive.function.client.WebClient$Builder' in your configuration.
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  26.896 s
+[INFO] Finished at: 2026-05-15T13:08:52-04:00
+[INFO] ------------------------------------------------------------------------

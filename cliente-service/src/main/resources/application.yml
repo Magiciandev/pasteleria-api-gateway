@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: cliente-service
+  profiles:
+    active: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/bd_cliente?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true
+
+server:
+  port: 9091
+
+logging:
+  level:
+    com.example.cliente_service: DEBUG
+  file:
+    name: logs/cliente-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:mysql://host.docker.internal:3306/bd_cliente?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true
+
+server:
+  port: 9091
+
+logging:
+  level:
+    com.example.cliente_service: INFO
+  file:
+    name: logs/cliente-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html

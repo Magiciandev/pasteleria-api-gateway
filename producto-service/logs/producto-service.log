@@ -1,0 +1,60 @@
+2026-06-19T23:02:46.543-04:00  INFO 11372 --- [producto-service] [main] c.e.p.ProductoServiceApplicationTests    : Starting ProductoServiceApplicationTests using Java 24.0.2 with PID 11372 (started by Max in C:\Users\Max\Desktop\pasteleria\producto-service)
+2026-06-19T23:02:46.548-04:00 DEBUG 11372 --- [producto-service] [main] c.e.p.ProductoServiceApplicationTests    : Running with Spring Boot v4.0.5, Spring v7.0.6
+2026-06-19T23:02:46.551-04:00  INFO 11372 --- [producto-service] [main] c.e.p.ProductoServiceApplicationTests    : The following 1 profile is active: "dev"
+2026-06-19T23:02:49.289-04:00  INFO 11372 --- [producto-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-19T23:02:49.419-04:00  INFO 11372 --- [producto-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 107 ms. Found 2 JPA repository interfaces.
+2026-06-19T23:02:50.630-04:00  INFO 11372 --- [producto-service] [main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-06-19T23:02:50.793-04:00  INFO 11372 --- [producto-service] [main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-06-19T23:02:52.277-04:00  INFO 11372 --- [producto-service] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-19T23:02:52.444-04:00  INFO 11372 --- [producto-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-19T23:02:53.288-04:00  INFO 11372 --- [producto-service] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@198d9e3b
+2026-06-19T23:02:53.294-04:00  INFO 11372 --- [producto-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-19T23:02:53.458-04:00  WARN 11372 --- [producto-service] [main] org.hibernate.orm.core                   : HHH000511: The 5.5.5 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-19T23:02:53.505-04:00  INFO 11372 --- [producto-service] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/bd_producto?createDatabaseIfNotExist=true]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 5.5.5
+	Default catalog/schema: bd_producto/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-19T23:02:55.666-04:00  INFO 11372 --- [producto-service] [main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-19T23:02:55.678-04:00  INFO 11372 --- [producto-service] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-19T23:02:55.831-04:00  INFO 11372 --- [producto-service] [main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-19T23:02:58.223-04:00  INFO 11372 --- [producto-service] [main] liquibase.changelog                      : Reading from bd_producto.databasechangelog
+2026-06-19T23:02:58.292-04:00  INFO 11372 --- [producto-service] [main] liquibase.ui                             : Database is up to date, no changesets to execute
+2026-06-19T23:02:58.296-04:00  INFO 11372 --- [producto-service] [main] liquibase.changelog                      : Reading from bd_producto.databasechangelog
+2026-06-19T23:02:58.313-04:00  INFO 11372 --- [producto-service] [main] liquibase.util                           : UPDATE SUMMARY
+2026-06-19T23:02:58.313-04:00  INFO 11372 --- [producto-service] [main] liquibase.util                           : Run:                          0
+2026-06-19T23:02:58.313-04:00  INFO 11372 --- [producto-service] [main] liquibase.util                           : Previously run:               2
+2026-06-19T23:02:58.313-04:00  INFO 11372 --- [producto-service] [main] liquibase.util                           : Filtered out:                 0
+2026-06-19T23:02:58.313-04:00  INFO 11372 --- [producto-service] [main] liquibase.util                           : -------------------------------
+2026-06-19T23:02:58.314-04:00  INFO 11372 --- [producto-service] [main] liquibase.util                           : Total change sets:            2
+2026-06-19T23:02:58.315-04:00  INFO 11372 --- [producto-service] [main] liquibase.util                           : Update summary generated
+2026-06-19T23:02:58.317-04:00  INFO 11372 --- [producto-service] [main] liquibase.command                        : Command execution complete
+2026-06-19T23:02:59.844-04:00  INFO 11372 --- [producto-service] [main] c.e.p.ProductoServiceApplicationTests    : Started ProductoServiceApplicationTests in 14.503 seconds (process running for 18.809)
+2026-06-19T23:03:00.620-04:00  INFO 11372 --- [producto-service] [main] c.example.producto_service.DataLoader    : DataLoader: ya existen productos, se omite la carga inicial
+2026-06-19T23:03:00.621-04:00  WARN 11372 --- [producto-service] [main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-06-19T23:03:00.621-04:00  WARN 11372 --- [producto-service] [main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /doc/swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-06-19T23:03:01.711-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Listando todos los productos
+2026-06-19T23:03:01.716-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Total productos: 2
+2026-06-19T23:03:01.757-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Actualizando producto id=1
+2026-06-19T23:03:01.761-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Producto actualizado exitosamente id=1
+2026-06-19T23:03:01.775-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Buscando producto id=99
+2026-06-19T23:03:01.776-04:00  WARN 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Producto no encontrado id=99
+2026-06-19T23:03:01.783-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Guardando producto: nombre=Torta de Chocolate
+2026-06-19T23:03:01.783-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Producto guardado exitosamente id=1
+2026-06-19T23:03:01.792-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Eliminando producto id=1
+2026-06-19T23:03:01.792-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Producto eliminado exitosamente id=1
+2026-06-19T23:03:01.797-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Actualizando producto id=99
+2026-06-19T23:03:01.802-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Guardando producto: nombre=Pan Amasado
+2026-06-19T23:03:01.802-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Producto guardado exitosamente id=null
+2026-06-19T23:03:01.806-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Buscando producto id=1
+2026-06-19T23:03:01.815-04:00  INFO 11372 --- [producto-service] [main] c.e.p.service.ProductoService            : Eliminando producto id=99
+2026-06-19T23:03:01.844-04:00  INFO 11372 --- [producto-service] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-19T23:03:02.226-04:00  INFO 11372 --- [producto-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-06-19T23:03:02.237-04:00  INFO 11372 --- [producto-service] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
