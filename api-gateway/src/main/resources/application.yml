@@ -1,0 +1,193 @@
+server:
+  port: 9090
+
+spring:
+  main:
+    web-application-type: reactive
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: esta_es_mi_compleja_clave_secreta
+
+  cloud:
+    gateway:
+      routes:
+
+        # =========================================================
+        # AUTH-SERVICE (Puerto 9097)
+        # =========================================================
+        - id: auth-service
+          uri: http://auth-service:9097
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=0
+
+        - id: auth-service-api-docs
+          uri: http://auth-service:9097
+          predicates:
+            - Path=/auth-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: auth-service-swagger-ui
+          uri: http://auth-service:9097
+          predicates:
+            - Path=/auth-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1
+
+        # =========================================================
+        # CLIENTE-SERVICE (Puerto 9091)
+        # =========================================================
+        - id: cliente-service
+          uri: http://cliente-service:9091
+          predicates:
+            - Path=/clientes/**
+          filters:
+            - StripPrefix=0
+
+        - id: cliente-service-api-docs
+          uri: http://cliente-service:9091
+          predicates:
+            - Path=/cliente-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: cliente-service-swagger-ui
+          uri: http://cliente-service:9091
+          predicates:
+            - Path=/cliente-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1
+
+        # =========================================================
+        # EMPLEADO-SERVICE (Puerto 9092)
+        # =========================================================
+        - id: empleado-service
+          uri: http://empleado-service:9092
+          predicates:
+            - Path=/empleados/**
+          filters:
+            - StripPrefix=0
+
+        - id: empleado-service-api-docs
+          uri: http://empleado-service:9092
+          predicates:
+            - Path=/empleado-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: empleado-service-swagger-ui
+          uri: http://empleado-service:9092
+          predicates:
+            - Path=/empleado-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1
+
+        # =========================================================
+        # PRODUCTO-SERVICE (Puerto 9093)
+        # =========================================================
+        - id: producto-service
+          uri: http://producto-service:9093
+          predicates:
+            - Path=/productos/**
+          filters:
+            - StripPrefix=0
+
+        - id: producto-service-api-docs
+          uri: http://producto-service:9093
+          predicates:
+            - Path=/producto-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: producto-service-swagger-ui
+          uri: http://producto-service:9093
+          predicates:
+            - Path=/producto-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1
+
+        # =========================================================
+        # PEDIDO-SERVICE (Puerto 9094)
+        # =========================================================
+        - id: pedido-service
+          uri: http://pedido-service:9094
+          predicates:
+            - Path=/pedidos/**
+          filters:
+            - StripPrefix=0
+
+        - id: pedido-service-api-docs
+          uri: http://pedido-service:9094
+          predicates:
+            - Path=/pedido-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: pedido-service-swagger-ui
+          uri: http://pedido-service:9094
+          predicates:
+            - Path=/pedido-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1
+
+        # =========================================================
+        # ASISTENCIA-SERVICE (Puerto 9095)
+        # =========================================================
+        - id: asistencia-service
+          uri: http://asistencia-service:9095
+          predicates:
+            - Path=/asistencias/**
+          filters:
+            - StripPrefix=0
+
+        - id: asistencia-service-api-docs
+          uri: http://asistencia-service:9095
+          predicates:
+            - Path=/asistencia-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: asistencia-service-swagger-ui
+          uri: http://asistencia-service:9095
+          predicates:
+            - Path=/asistencia-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1
+
+        # =========================================================
+        # ENVIO-SERVICE (Puerto 9096)
+        # =========================================================
+        - id: envio-service
+          uri: http://envio-service:9096
+          predicates:
+            - Path=/envios/**
+          filters:
+            - StripPrefix=0
+
+        - id: envio-service-api-docs
+          uri: http://envio-service:9096
+          predicates:
+            - Path=/envio-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: envio-service-swagger-ui
+          uri: http://envio-service:9096
+          predicates:
+            - Path=/envio-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1
+
+        # =========================================================
+        # RECURSOS ESTÁTICOS DE SWAGGER (Webjars compartidos)
+        # =========================================================
+        - id: swagger-webjars
+          uri: http://cliente-service:9091
+          predicates:
+            - Path=/webjars/**
+          filters:
+            - StripPrefix=0

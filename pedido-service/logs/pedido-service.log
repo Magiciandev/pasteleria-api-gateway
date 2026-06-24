@@ -1,0 +1,902 @@
+2026-06-19T23:02:35.717-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.PedidoServiceApplicationTests      : Starting PedidoServiceApplicationTests using Java 24.0.2 with PID 25904 (started by Max in C:\Users\Max\Desktop\pasteleria\pedido-service)
+2026-06-19T23:02:35.721-04:00 DEBUG 25904 --- [pedido-service] [main] c.e.p.PedidoServiceApplicationTests      : Running with Spring Boot v4.0.5, Spring v7.0.6
+2026-06-19T23:02:35.723-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.PedidoServiceApplicationTests      : The following 1 profile is active: "dev"
+2026-06-19T23:02:39.416-04:00  INFO 25904 --- [pedido-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-19T23:02:39.781-04:00  INFO 25904 --- [pedido-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 341 ms. Found 2 JPA repository interfaces.
+2026-06-19T23:02:41.149-04:00  INFO 25904 --- [pedido-service] [main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-06-19T23:02:41.303-04:00  INFO 25904 --- [pedido-service] [main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-06-19T23:02:42.534-04:00  INFO 25904 --- [pedido-service] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-19T23:02:42.664-04:00  INFO 25904 --- [pedido-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-19T23:02:43.382-04:00  INFO 25904 --- [pedido-service] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@10a89001
+2026-06-19T23:02:43.387-04:00  INFO 25904 --- [pedido-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-19T23:02:43.603-04:00  WARN 25904 --- [pedido-service] [main] org.hibernate.orm.core                   : HHH000511: The 5.5.5 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-19T23:02:43.677-04:00  INFO 25904 --- [pedido-service] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/bd_pedidos?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 5.5.5
+	Default catalog/schema: bd_pedidos/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-06-19T23:02:47.095-04:00  INFO 25904 --- [pedido-service] [main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-19T23:02:47.115-04:00  INFO 25904 --- [pedido-service] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-19T23:02:47.410-04:00  INFO 25904 --- [pedido-service] [main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-19T23:02:48.141-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.GlobalConfiguration
+2026-06-19T23:02:48.146-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+2026-06-19T23:02:48.147-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.logging.core.DefaultLoggerConfiguration
+2026-06-19T23:02:48.149-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.sql.SqlConfiguration
+2026-06-19T23:02:48.152-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.configuration.AutoloadedConfigurations instance liquibase.parser.ChangeLogParserConfiguration
+2026-06-19T23:02:48.152-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found ConfigurationDefinitions in liquibase.GlobalConfiguration
+2026-06-19T23:02:48.153-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found ConfigurationDefinitions in liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+2026-06-19T23:02:48.153-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found ConfigurationDefinitions in liquibase.logging.core.DefaultLoggerConfiguration
+2026-06-19T23:02:48.154-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found ConfigurationDefinitions in liquibase.sql.SqlConfiguration
+2026-06-19T23:02:48.154-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found ConfigurationDefinitions in liquibase.parser.ChangeLogParserConfiguration
+2026-06-19T23:02:48.161-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.configuration.ConfigurationValueProvider instance liquibase.configuration.core.DeprecatedConfigurationValueProvider
+2026-06-19T23:02:48.163-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.configuration.ConfigurationValueProvider instance liquibase.configuration.core.SystemPropertyValueProvider
+2026-06-19T23:02:48.165-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.configuration.ConfigurationValueProvider instance liquibase.configuration.core.ScopeValueProvider
+2026-06-19T23:02:48.167-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.configuration.ConfigurationValueProvider instance liquibase.configuration.core.EnvironmentValueProvider
+2026-06-19T23:02:48.175-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.logging.LogService instance liquibase.logging.core.BufferedLogService
+2026-06-19T23:02:48.177-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.logging.LogService instance liquibase.logging.core.CompositeLogService
+2026-06-19T23:02:48.177-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.logging.LogService instance liquibase.logging.core.JavaLogService
+2026-06-19T23:02:48.179-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.servicelocator.ServiceLocator instance liquibase.servicelocator.StandardServiceLocator
+2026-06-19T23:02:48.237-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.shouldRun aka should.run found
+2026-06-19T23:02:48.238-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.shouldRun is using the default value of true
+2026-06-19T23:02:48.258-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.jvm.ConnectionPatterns instance liquibase.database.jvm.JdbcConnectionPatterns
+2026-06-19T23:02:48.291-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.CockroachDatabase
+2026-06-19T23:02:48.296-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.DB2Database
+2026-06-19T23:02:48.298-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.Db2zDatabase
+2026-06-19T23:02:48.301-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.DerbyDatabase
+2026-06-19T23:02:48.303-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.EnterpriseDBDatabase
+2026-06-19T23:02:48.305-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.FirebirdDatabase
+2026-06-19T23:02:48.310-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.H2Database
+2026-06-19T23:02:48.314-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.HsqlDatabase
+2026-06-19T23:02:48.318-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.InformixDatabase
+2026-06-19T23:02:48.320-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.Ingres9Database
+2026-06-19T23:02:48.328-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.MSSQLDatabase
+2026-06-19T23:02:48.334-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.MariaDBDatabase
+2026-06-19T23:02:48.339-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.MockDatabase
+2026-06-19T23:02:48.339-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.MySQLDatabase
+2026-06-19T23:02:48.343-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.OracleDatabase
+2026-06-19T23:02:48.343-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.PostgresDatabase
+2026-06-19T23:02:48.346-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.SQLiteDatabase
+2026-06-19T23:02:48.349-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.SybaseASADatabase
+2026-06-19T23:02:48.351-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.SybaseDatabase
+2026-06-19T23:02:48.353-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.UnsupportedDatabase
+2026-06-19T23:02:48.355-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.Database instance liquibase.database.core.SnowflakeDatabase
+2026-06-19T23:02:48.363-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.database                       : Connected to root@localhost@jdbc:mysql://localhost:3306/bd_pedidos?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+2026-06-19T23:02:48.364-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.database                       : Setting auto commit to false from true
+2026-06-19T23:02:48.379-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.databaseChangelogLockTableName aka liquibase.databaseChangeLogLockTableName found
+2026-06-19T23:02:48.380-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.databaseChangelogLockTableName is using the default value of DATABASECHANGELOGLOCK
+2026-06-19T23:02:48.389-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.databaseChangelogTableName aka liquibase.databaseChangeLogTableName found
+2026-06-19T23:02:48.390-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.databaseChangelogTableName is using the default value of DATABASECHANGELOG
+2026-06-19T23:02:48.393-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.liquibaseSchemaName aka liquibase.schemaName found
+2026-06-19T23:02:48.398-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.supportPropertyEscaping aka enableEscaping found
+2026-06-19T23:02:48.398-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.supportPropertyEscaping is using the default value of false
+2026-06-19T23:02:48.472-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.CalculateChecksumCommandStep
+2026-06-19T23:02:48.476-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.ChangelogSyncCommandStep
+2026-06-19T23:02:48.478-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.ChangelogSyncSqlCommandStep
+2026-06-19T23:02:48.482-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.ChangelogSyncToTagCommandStep
+2026-06-19T23:02:48.485-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.ChangelogSyncToTagSqlCommandStep
+2026-06-19T23:02:48.487-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.ClearChecksumsCommandStep
+2026-06-19T23:02:48.494-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.DbDocCommandStep
+2026-06-19T23:02:48.517-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.AddAutoIncrementChange
+2026-06-19T23:02:48.524-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.AddColumnChange
+2026-06-19T23:02:48.529-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.AddDefaultValueChange
+2026-06-19T23:02:48.533-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.AddForeignKeyConstraintChange
+2026-06-19T23:02:48.537-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.AddLookupTableChange
+2026-06-19T23:02:48.539-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.AddNotNullConstraintChange
+2026-06-19T23:02:48.541-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.AddPrimaryKeyChange
+2026-06-19T23:02:48.543-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.AddUniqueConstraintChange
+2026-06-19T23:02:48.545-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.AlterSequenceChange
+2026-06-19T23:02:48.548-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.CreateIndexChange
+2026-06-19T23:02:48.554-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.CreateProcedureChange
+2026-06-19T23:02:48.555-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.CreateSequenceChange
+2026-06-19T23:02:48.558-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.CreateTableChange
+2026-06-19T23:02:48.563-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.CreateViewChange
+2026-06-19T23:02:48.565-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DeleteDataChange
+2026-06-19T23:02:48.567-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropAllForeignKeyConstraintsChange
+2026-06-19T23:02:48.569-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropColumnChange
+2026-06-19T23:02:48.571-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropDefaultValueChange
+2026-06-19T23:02:48.572-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropForeignKeyConstraintChange
+2026-06-19T23:02:48.574-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropIndexChange
+2026-06-19T23:02:48.576-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropNotNullConstraintChange
+2026-06-19T23:02:48.578-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropPrimaryKeyChange
+2026-06-19T23:02:48.580-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropProcedureChange
+2026-06-19T23:02:48.581-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropSequenceChange
+2026-06-19T23:02:48.583-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropTableChange
+2026-06-19T23:02:48.585-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropUniqueConstraintChange
+2026-06-19T23:02:48.587-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.DropViewChange
+2026-06-19T23:02:48.588-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.EmptyChange
+2026-06-19T23:02:48.593-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.ExecuteShellCommandChange
+2026-06-19T23:02:48.596-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.InsertDataChange
+2026-06-19T23:02:48.612-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.LoadDataChange
+2026-06-19T23:02:48.617-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.LoadUpdateDataChange
+2026-06-19T23:02:48.619-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.MergeColumnChange
+2026-06-19T23:02:48.620-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.ModifyDataTypeChange
+2026-06-19T23:02:48.622-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.OutputChange
+2026-06-19T23:02:48.627-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.RawSQLChange
+2026-06-19T23:02:48.630-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.RenameColumnChange
+2026-06-19T23:02:48.632-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.RenameSequenceChange
+2026-06-19T23:02:48.634-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.RenameTableChange
+2026-06-19T23:02:48.636-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.RenameViewChange
+2026-06-19T23:02:48.638-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.SQLFileChange
+2026-06-19T23:02:48.639-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.SetColumnRemarksChange
+2026-06-19T23:02:48.641-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.SetTableRemarksChange
+2026-06-19T23:02:48.643-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.StopChange
+2026-06-19T23:02:48.644-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.TagDatabaseChange
+2026-06-19T23:02:48.646-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.core.UpdateDataChange
+2026-06-19T23:02:48.649-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.change.Change instance liquibase.change.custom.CustomChangeWrapper
+2026-06-19T23:02:48.878-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.DiffChangelogCommandStep
+2026-06-19T23:02:48.885-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.DiffCommandStep
+2026-06-19T23:02:48.887-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.DropAllCommandStep
+2026-06-19T23:02:48.889-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.ExecuteSqlCommandStep
+2026-06-19T23:02:48.893-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.FutureRollbackCountSqlCommandStep
+2026-06-19T23:02:48.895-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.FutureRollbackFromTagSqlCommandStep
+2026-06-19T23:02:48.897-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.FutureRollbackSqlCommandStep
+2026-06-19T23:02:48.902-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.GenerateChangelogCommandStep
+2026-06-19T23:02:48.908-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.HistoryCommandStep
+2026-06-19T23:02:48.910-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.InternalSnapshotCommandStep
+2026-06-19T23:02:48.912-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.ListLocksCommandStep
+2026-06-19T23:02:48.913-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.MarkNextChangesetRanCommandStep
+2026-06-19T23:02:48.914-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.MarkNextChangesetRanSqlCommandStep
+2026-06-19T23:02:48.915-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.ReleaseLocksCommandStep
+2026-06-19T23:02:48.922-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackCommandStep
+2026-06-19T23:02:48.923-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackCountCommandStep
+2026-06-19T23:02:48.925-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackCountSqlCommandStep
+2026-06-19T23:02:48.927-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackSqlCommandStep
+2026-06-19T23:02:48.929-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackToDateCommandStep
+2026-06-19T23:02:48.931-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.RollbackToDateSqlCommandStep
+2026-06-19T23:02:48.932-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.SnapshotCommandStep
+2026-06-19T23:02:48.934-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.SnapshotReferenceCommandStep
+2026-06-19T23:02:48.937-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.StartH2CommandStep
+2026-06-19T23:02:48.941-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.StatusCommandStep
+2026-06-19T23:02:48.942-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.StopH2CommandStep
+2026-06-19T23:02:48.943-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.TagCommandStep
+2026-06-19T23:02:48.945-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.TagExistsCommandStep
+2026-06-19T23:02:48.947-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.UnexpectedChangesetsCommandStep
+2026-06-19T23:02:48.948-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateCommandStep
+2026-06-19T23:02:48.949-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateCountCommandStep
+2026-06-19T23:02:48.951-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateCountSqlCommandStep
+2026-06-19T23:02:48.953-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateSqlCommandStep
+2026-06-19T23:02:48.955-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateTestingRollbackCommandStep
+2026-06-19T23:02:48.975-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateToTagCommandStep
+2026-06-19T23:02:48.977-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.UpdateToTagSqlCommandStep
+2026-06-19T23:02:48.978-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.ValidateCommandStep
+2026-06-19T23:02:48.981-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.ChangeExecListenerCommandStep
+2026-06-19T23:02:48.983-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.DatabaseChangelogCommandStep
+2026-06-19T23:02:48.985-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
+2026-06-19T23:02:48.988-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.DbUrlConnectionCommandStep
+2026-06-19T23:02:48.993-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.DiffOutputControlCommandStep
+2026-06-19T23:02:48.995-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.LockServiceCommandStep
+2026-06-19T23:02:48.997-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.OutputWriterCommandStep
+2026-06-19T23:02:49.001-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.PreCompareCommandStep
+2026-06-19T23:02:49.003-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.ReferenceDatabaseOutputWriterCommandStep
+2026-06-19T23:02:49.005-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
+2026-06-19T23:02:49.007-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.command.CommandStep instance liquibase.command.core.helpers.ShowSummaryArgument
+2026-06-19T23:02:49.025-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.logging.mdc.MdcManager instance liquibase.logging.mdc.NoOpMdcManager
+2026-06-19T23:02:49.030-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.strict found
+2026-06-19T23:02:49.031-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.strict is using the default value of false
+2026-06-19T23:02:49.035-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.changeExecListener found
+2026-06-19T23:02:49.036-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.changeExecListener found
+2026-06-19T23:02:49.037-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.changeExecListenerClass found
+2026-06-19T23:02:49.038-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.changeExecListenerClass found
+2026-06-19T23:02:49.039-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.changeExecListenerPropertiesFile found
+2026-06-19T23:02:49.040-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.changeExecListenerPropertiesFile found
+2026-06-19T23:02:49.040-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found 'liquibase.command.update.changelogFile' configuration of 'classpath:db/changelog-master.xml'
+    command argument 'changelogFile' of 'classpath:db/changelog-master.xml'
+2026-06-19T23:02:49.041-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found 'liquibase.command.update.changelogParameters' configuration of 'liquibase.changelog.ChangeLogParameters@52b30b94'
+    command argument 'changelogParameters' of 'liquibase.changelog.ChangeLogParameters@52b30b94'
+2026-06-19T23:02:49.042-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.contextFilter aka liquibase.command.update.contexts found
+2026-06-19T23:02:49.043-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.contextFilter aka liquibase.command.contexts found
+2026-06-19T23:02:49.048-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found 'liquibase.command.update.database' configuration of 'root@localhost @ jdbc:mysql://localhost:3306/bd_pedidos?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC (Default Schema: bd_pedidos)'
+    command argument 'database' of 'root@localhost @ jdbc:mysql://localhost:3306/bd_pedidos?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC (Default Schema: bd_pedidos)'
+2026-06-19T23:02:49.049-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.databaseChangelog found
+2026-06-19T23:02:49.050-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.databaseChangelog found
+2026-06-19T23:02:49.050-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.defaultCatalogName found
+2026-06-19T23:02:49.051-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.defaultCatalogName found
+2026-06-19T23:02:49.052-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.defaultSchemaName found
+2026-06-19T23:02:49.052-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.defaultSchemaName found
+2026-06-19T23:02:49.054-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.driver found
+2026-06-19T23:02:49.055-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.driver found
+2026-06-19T23:02:49.056-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.driverPropertiesFile found
+2026-06-19T23:02:49.058-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.driverPropertiesFile found
+2026-06-19T23:02:49.060-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.labelFilter aka liquibase.command.update.labels found
+2026-06-19T23:02:49.062-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.labelFilter aka liquibase.command.labels found
+2026-06-19T23:02:49.064-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.password found
+2026-06-19T23:02:49.065-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.password found
+2026-06-19T23:02:49.066-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.showSummary found
+2026-06-19T23:02:49.066-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.update.showSummary is using the default value of SUMMARY
+2026-06-19T23:02:49.067-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.showSummary found
+2026-06-19T23:02:49.067-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.showSummary is using the default value of SUMMARY
+2026-06-19T23:02:49.068-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found 'liquibase.command.update.showSummaryOutput' configuration of 'LOG'
+    command argument 'showSummaryOutput' of 'LOG'
+2026-06-19T23:02:49.069-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.skipDatabaseStep found
+2026-06-19T23:02:49.069-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.update.skipDatabaseStep is using the default value of false
+2026-06-19T23:02:49.070-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.skipDatabaseStep found
+2026-06-19T23:02:49.070-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.skipDatabaseStep is using the default value of false
+2026-06-19T23:02:49.071-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.updateNullChecksums found
+2026-06-19T23:02:49.071-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.update.updateNullChecksums is using the default value of false
+2026-06-19T23:02:49.072-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.updateNullChecksums found
+2026-06-19T23:02:49.072-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.updateNullChecksums is using the default value of false
+2026-06-19T23:02:49.072-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.url found
+2026-06-19T23:02:49.073-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.url found
+2026-06-19T23:02:49.076-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.update.username found
+2026-06-19T23:02:49.077-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.command.username found
+2026-06-19T23:02:49.080-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.command                        : Pipeline for command 'update: liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep then liquibase.command.core.helpers.ShowSummaryArgument then liquibase.command.core.helpers.DbUrlConnectionCommandStep then liquibase.command.core.helpers.DatabaseChangelogCommandStep then liquibase.command.core.helpers.ChangeExecListenerCommandStep then liquibase.command.core.UpdateCommandStep
+2026-06-19T23:02:49.081-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.outputFile found
+2026-06-19T23:02:49.082-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.outputFileEncoding found
+2026-06-19T23:02:49.082-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.outputFileEncoding is using the default value of UTF-8
+2026-06-19T23:02:49.082-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.command                        : Writing output with encoding 'UTF-8'
+2026-06-19T23:02:49.083-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.command                        : Executing internal command dbUrlConnectionArguments
+2026-06-19T23:02:49.083-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.command                        : Executing internal command showSummary
+2026-06-19T23:02:49.083-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.update.showSummary is using the default value of SUMMARY
+2026-06-19T23:02:49.084-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.showSummary is using the default value of SUMMARY
+2026-06-19T23:02:49.085-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.command                        : Executing internal command dbUrlConnectionCommandStep
+2026-06-19T23:02:49.086-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.update.skipDatabaseStep is using the default value of false
+2026-06-19T23:02:49.086-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.command.skipDatabaseStep is using the default value of false
+2026-06-19T23:02:49.092-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.command                        : Executing internal command changelogCommandStep
+2026-06-19T23:02:49.116-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.formattedsql.FormattedSqlChangeLogParser
+2026-06-19T23:02:49.120-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.json.JsonChangeLogParser
+2026-06-19T23:02:49.122-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.sql.SqlChangeLogParser
+2026-06-19T23:02:49.139-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.validateXmlChangelogFiles found
+2026-06-19T23:02:49.140-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.validateXmlChangelogFiles is using the default value of true
+2026-06-19T23:02:49.140-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.secureParsing found
+2026-06-19T23:02:49.141-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.secureParsing is using the default value of true
+2026-06-19T23:02:49.141-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.xml.XMLChangeLogSAXParser
+2026-06-19T23:02:49.141-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.parser.ChangeLogParser instance liquibase.parser.core.yaml.YamlChangeLogParser
+2026-06-19T23:02:49.142-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.parser                         : Matched file 'classpath:db/changelog-master.xml' to parser 'XMLChangeLogSAXParser'
+2026-06-19T23:02:49.170-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.CustomPreconditionWrapper
+2026-06-19T23:02:49.170-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.AndPrecondition
+2026-06-19T23:02:49.171-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ChangeLogPropertyDefinedPrecondition
+2026-06-19T23:02:49.173-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ChangeSetExecutedPrecondition
+2026-06-19T23:02:49.176-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ColumnExistsPrecondition
+2026-06-19T23:02:49.177-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.DBMSPrecondition
+2026-06-19T23:02:49.179-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ForeignKeyExistsPrecondition
+2026-06-19T23:02:49.180-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.IndexExistsPrecondition
+2026-06-19T23:02:49.182-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.NotPrecondition
+2026-06-19T23:02:49.183-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ObjectQuotingStrategyPrecondition
+2026-06-19T23:02:49.184-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.OrPrecondition
+2026-06-19T23:02:49.185-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.PreconditionContainer
+2026-06-19T23:02:49.186-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.PrimaryKeyExistsPrecondition
+2026-06-19T23:02:49.188-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.RowCountPrecondition
+2026-06-19T23:02:49.191-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.RunningAsPrecondition
+2026-06-19T23:02:49.193-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.SequenceExistsPrecondition
+2026-06-19T23:02:49.195-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.SqlPrecondition
+2026-06-19T23:02:49.196-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.TableExistsPrecondition
+2026-06-19T23:02:49.199-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.TableIsEmptyPrecondition
+2026-06-19T23:02:49.201-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.UniqueConstraintExistsPrecondition
+2026-06-19T23:02:49.202-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.precondition.Precondition instance liquibase.precondition.core.ViewExistsPrecondition
+2026-06-19T23:02:49.296-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.parser                         : Resolving XML entity name='null', publicId='null', baseURI='null', systemId='http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd'
+2026-06-19T23:02:49.428-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.fileEncoding found
+2026-06-19T23:02:49.428-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.fileEncoding is using the default value of UTF-8
+2026-06-19T23:02:49.429-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.parser                         : Matched file 'db/changelog/db.changelog.sql' to parser 'FormattedSqlChangeLogParser'
+2026-06-19T23:02:49.433-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.changeset.ChangeSetService instance liquibase.changeset.StandardChangeSetService
+2026-06-19T23:02:49.438-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Found 'liquibase.command.update.updateNullChecksums' configuration of 'true'
+    command argument 'updateNullChecksums' of 'true'
+2026-06-19T23:02:49.446-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.changelog.ChangeLogHistoryService instance liquibase.changelog.MockChangeLogHistoryService
+2026-06-19T23:02:49.452-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.changelog.ChangeLogHistoryService instance liquibase.changelog.StandardChangeLogHistoryService
+2026-06-19T23:02:49.459-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.CatalogSnapshotGenerator
+2026-06-19T23:02:49.467-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ColumnSnapshotGenerator
+2026-06-19T23:02:49.469-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ColumnSnapshotGeneratorH2
+2026-06-19T23:02:49.470-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ColumnSnapshotGeneratorInformix
+2026-06-19T23:02:49.471-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ColumnSnapshotGeneratorOracle
+2026-06-19T23:02:49.473-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.DataSnapshotGenerator
+2026-06-19T23:02:49.478-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ForeignKeySnapshotGenerator
+2026-06-19T23:02:49.484-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.IndexSnapshotGenerator
+2026-06-19T23:02:49.486-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.PrimaryKeySnapshotGenerator
+2026-06-19T23:02:49.487-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.SchemaSnapshotGenerator
+2026-06-19T23:02:49.490-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.SequenceSnapshotGenerator
+2026-06-19T23:02:49.492-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.TableSnapshotGenerator
+2026-06-19T23:02:49.496-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.UniqueConstraintSnapshotGenerator
+2026-06-19T23:02:49.498-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.ViewSnapshotGenerator
+2026-06-19T23:02:49.499-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.SchemaSnapshotGeneratorSnowflake
+2026-06-19T23:02:49.500-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.SequenceSnapshotGeneratorSnowflake
+2026-06-19T23:02:49.501-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.snapshot.SnapshotGenerator instance liquibase.snapshot.jvm.UniqueConstraintSnapshotGeneratorSnowflake
+2026-06-19T23:02:49.503-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.liquibaseCatalogName aka liquibase.catalogName found
+2026-06-19T23:02:49.512-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.util                           : Computed checksum for 1781924569510 as 5498ddb8cfbc13f293f466ee5c976f06
+2026-06-19T23:02:49.529-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.preserveSchemaCase found
+2026-06-19T23:02:49.529-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.preserveSchemaCase is using the default value of false
+2026-06-19T23:02:49.560-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.database.LiquibaseTableNames instance liquibase.database.StandardLiquibaseTableNames
+2026-06-19T23:02:50.402-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.executor.Executor instance liquibase.executor.jvm.JdbcExecutor
+2026-06-19T23:02:50.404-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.executor.Executor instance liquibase.executor.jvm.SnowflakeJdbcExecutor
+2026-06-19T23:02:50.512-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.CatalogComparator
+2026-06-19T23:02:50.514-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.ColumnComparator
+2026-06-19T23:02:50.515-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.DefaultDatabaseObjectComparator
+2026-06-19T23:02:50.517-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.ForeignKeyComparator
+2026-06-19T23:02:50.519-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.IndexComparator
+2026-06-19T23:02:50.520-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.PrimaryKeyComparator
+2026-06-19T23:02:50.522-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.SchemaComparator
+2026-06-19T23:02:50.523-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.TableComparator
+2026-06-19T23:02:50.525-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.diff.compare.DatabaseObjectComparator instance liquibase.diff.compare.core.UniqueConstraintComparator
+2026-06-19T23:02:50.533-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.includeCatalogInSpecification found
+2026-06-19T23:02:50.533-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.includeCatalogInSpecification is using the default value of false
+2026-06-19T23:02:50.548-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.sql.alwaysSetFetchSize found
+2026-06-19T23:02:50.548-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.sql.alwaysSetFetchSize is using the default value of true
+2026-06-19T23:02:50.563-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGenerator
+2026-06-19T23:02:50.566-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2
+2026-06-19T23:02:50.567-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsqlH2
+2026-06-19T23:02:50.570-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorInformix
+2026-06-19T23:02:50.573-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorMySQL
+2026-06-19T23:02:50.576-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddAutoIncrementGeneratorSQLite
+2026-06-19T23:02:50.579-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddColumnGenerator
+2026-06-19T23:02:50.582-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddColumnGeneratorDefaultClauseBeforeNotNull
+2026-06-19T23:02:50.584-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddColumnGeneratorSQLite
+2026-06-19T23:02:50.587-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGenerator
+2026-06-19T23:02:50.588-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorDerby
+2026-06-19T23:02:50.590-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorInformix
+2026-06-19T23:02:50.592-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorMSSQL
+2026-06-19T23:02:50.596-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorMySQL
+2026-06-19T23:02:50.599-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorOracle
+2026-06-19T23:02:50.602-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorPostgres
+2026-06-19T23:02:50.605-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorSQLite
+2026-06-19T23:02:50.607-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorSybase
+2026-06-19T23:02:50.608-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddDefaultValueGeneratorSybaseASA
+2026-06-19T23:02:50.610-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddForeignKeyConstraintGenerator
+2026-06-19T23:02:50.612-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddPrimaryKeyGenerator
+2026-06-19T23:02:50.615-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddPrimaryKeyGeneratorInformix
+2026-06-19T23:02:50.616-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddUniqueConstraintGenerator
+2026-06-19T23:02:50.618-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddUniqueConstraintGeneratorInformix
+2026-06-19T23:02:50.619-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AddUniqueConstraintGeneratorTDS
+2026-06-19T23:02:50.621-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.AlterSequenceGenerator
+2026-06-19T23:02:50.624-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.BatchDmlExecutablePreparedStatementGenerator
+2026-06-19T23:02:50.626-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.ClearDatabaseChangeLogTableGenerator
+2026-06-19T23:02:50.629-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CommentGenerator
+2026-06-19T23:02:50.631-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CopyRowsGenerator
+2026-06-19T23:02:50.632-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateDatabaseChangeLogLockTableGenerator
+2026-06-19T23:02:50.634-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateDatabaseChangeLogTableGenerator
+2026-06-19T23:02:50.636-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateDatabaseChangeLogTableGeneratorSybase
+2026-06-19T23:02:50.638-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateIndexGenerator
+2026-06-19T23:02:50.640-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateIndexGeneratorFirebird
+2026-06-19T23:02:50.643-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateIndexGeneratorPostgres
+2026-06-19T23:02:50.645-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateProcedureGenerator
+2026-06-19T23:02:50.647-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateSequenceGenerator
+2026-06-19T23:02:50.654-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateTableGenerator
+2026-06-19T23:02:50.658-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateTableGeneratorInformix
+2026-06-19T23:02:50.661-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateViewGenerator
+2026-06-19T23:02:50.662-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateViewGeneratorInformix
+2026-06-19T23:02:50.664-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DeleteGenerator
+2026-06-19T23:02:50.666-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropColumnGenerator
+2026-06-19T23:02:50.668-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropDefaultValueGenerator
+2026-06-19T23:02:50.669-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropForeignKeyConstraintGenerator
+2026-06-19T23:02:50.671-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropIndexGenerator
+2026-06-19T23:02:50.673-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropPrimaryKeyGenerator
+2026-06-19T23:02:50.675-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropProcedureGenerator
+2026-06-19T23:02:50.676-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropSequenceGenerator
+2026-06-19T23:02:50.677-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropTableGenerator
+2026-06-19T23:02:50.679-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropUniqueConstraintGenerator
+2026-06-19T23:02:50.680-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropViewGenerator
+2026-06-19T23:02:50.681-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetNextChangeSetSequenceValueGenerator
+2026-06-19T23:02:50.683-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGenerator
+2026-06-19T23:02:50.685-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorDB2
+2026-06-19T23:02:50.687-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorDerby
+2026-06-19T23:02:50.688-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorFirebird
+2026-06-19T23:02:50.689-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorHsql
+2026-06-19T23:02:50.690-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorInformix
+2026-06-19T23:02:50.692-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorMSSQL
+2026-06-19T23:02:50.694-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorOracle
+2026-06-19T23:02:50.695-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorPostgres
+2026-06-19T23:02:50.696-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSybase
+2026-06-19T23:02:50.697-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSybaseASA
+2026-06-19T23:02:50.698-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InitializeDatabaseChangeLogLockTableGenerator
+2026-06-19T23:02:50.700-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertDataChangeGenerator
+2026-06-19T23:02:50.701-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertGenerator
+2026-06-19T23:02:50.704-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorDB2
+2026-06-19T23:02:50.706-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorH2
+2026-06-19T23:02:50.707-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorHsql
+2026-06-19T23:02:50.709-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorInformix
+2026-06-19T23:02:50.710-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMSSQL
+2026-06-19T23:02:50.711-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL
+2026-06-19T23:02:50.712-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorOracle
+2026-06-19T23:02:50.713-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorPostgres
+2026-06-19T23:02:50.715-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorSQLite
+2026-06-19T23:02:50.716-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorSybaseASA
+2026-06-19T23:02:50.717-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertSetGenerator
+2026-06-19T23:02:50.721-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.LockDatabaseChangeLogGenerator
+2026-06-19T23:02:50.722-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.MarkChangeSetRanGenerator
+2026-06-19T23:02:50.723-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.ModifyDataTypeGenerator
+2026-06-19T23:02:50.725-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RawParameterizedSqlGenerator
+2026-06-19T23:02:50.727-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RawSqlGenerator
+2026-06-19T23:02:50.728-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.ReindexGeneratorSQLite
+2026-06-19T23:02:50.728-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RemoveChangeSetRanStatusGenerator
+2026-06-19T23:02:50.729-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameColumnGenerator
+2026-06-19T23:02:50.730-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameSequenceGenerator
+2026-06-19T23:02:50.731-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameTableGenerator
+2026-06-19T23:02:50.732-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameViewGenerator
+2026-06-19T23:02:50.733-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.ReorganizeTableGeneratorDB2
+2026-06-19T23:02:50.734-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RuntimeGenerator
+2026-06-19T23:02:50.735-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SelectFromDatabaseChangeLogGenerator
+2026-06-19T23:02:50.736-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SelectFromDatabaseChangeLogLockGenerator
+2026-06-19T23:02:50.737-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetColumnRemarksGenerator
+2026-06-19T23:02:50.738-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetNullableGenerator
+2026-06-19T23:02:50.739-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetTableRemarksGenerator
+2026-06-19T23:02:50.740-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetViewRemarksGenerator
+2026-06-19T23:02:50.741-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.StoredProcedureGenerator
+2026-06-19T23:02:50.742-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.TableIsEmptyGenerator
+2026-06-19T23:02:50.742-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.TableRowCountGenerator
+2026-06-19T23:02:50.744-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.TagDatabaseGenerator
+2026-06-19T23:02:50.745-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.UnlockDatabaseChangeLogGenerator
+2026-06-19T23:02:50.746-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.UpdateChangeSetChecksumGenerator
+2026-06-19T23:02:50.747-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.UpdateDataChangeGenerator
+2026-06-19T23:02:50.748-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.UpdateGenerator
+2026-06-19T23:02:50.748-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.CreateSequenceGeneratorSnowflake
+2026-06-19T23:02:50.749-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropDefaultValueGeneratorSnowflake
+2026-06-19T23:02:50.750-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.DropProcedureGeneratorSnowflake
+2026-06-19T23:02:50.750-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.InsertOrUpdateGeneratorSnowflake
+2026-06-19T23:02:50.764-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameTableGeneratorSnowflake
+2026-06-19T23:02:50.765-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.RenameViewGeneratorSnowflake
+2026-06-19T23:02:50.766-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetColumnRemarksGeneratorSnowflake
+2026-06-19T23:02:50.767-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.SetTableRemarksGeneratorSnowflake
+2026-06-19T23:02:50.767-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.sqlgenerator.SqlGenerator instance liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSnowflake
+2026-06-19T23:02:50.801-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.executor                       : Changelog query completed.
+2026-06-19T23:02:50.806-04:00  INFO 25904 --- [pedido-service] [main] liquibase.changelog                      : Reading from bd_pedidos.databasechangelog
+2026-06-19T23:02:50.810-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.executor                       : Changelog query completed.
+2026-06-19T23:02:50.821-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.lockservice.LockService instance liquibase.lockservice.LockServiceImpl
+2026-06-19T23:02:50.822-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.lockservice.LockService instance liquibase.lockservice.MockLockService
+2026-06-19T23:02:50.823-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.lockservice.LockService instance liquibase.lockservice.OfflineLockService
+2026-06-19T23:02:50.823-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.lockservice.LockService instance liquibase.lockservice.StandardLockService
+2026-06-19T23:02:50.833-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.executor                       : Changelog query completed.
+2026-06-19T23:02:50.837-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.allowDuplicatedChangesetIdentifiers found
+2026-06-19T23:02:50.837-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.allowDuplicatedChangesetIdentifiers is using the default value of false
+2026-06-19T23:02:50.839-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.servicelocator                 : Loaded liquibase.changelog.visitor.ValidatingVisitorGenerator instance liquibase.changelog.visitor.StandardValidatingVisitorGenerator
+2026-06-19T23:02:50.849-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.util                           : Computed checksum for inputStream as bca01ecfc334e15e49a64a872aa93277
+2026-06-19T23:02:50.855-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.util                           : Computed checksum for 9:bca01ecfc334e15e49a64a872aa93277: as 7f8cc3509df30762c4e486587ffaedb5
+2026-06-19T23:02:50.859-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.util                           : Computed checksum for inputStream as ae7e295bb95910b91ec571c50d1d575a
+2026-06-19T23:02:50.860-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.util                           : Computed checksum for 9:ae7e295bb95910b91ec571c50d1d575a: as 019e712d88c57f64dce1b3e03c650d12
+2026-06-19T23:02:50.862-04:00  INFO 25904 --- [pedido-service] [main] liquibase.changelog                      : Change failed validation!
+2026-06-19T23:02:50.865-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : No configuration value for liquibase.outputLineSeparator found
+2026-06-19T23:02:50.865-04:00 DEBUG 25904 --- [pedido-service] [main] liquibase.configuration                  : Configuration liquibase.outputLineSeparator is using the default value of 
+
+2026-06-19T23:02:50.866-04:00  INFO 25904 --- [pedido-service] [main] liquibase.command                        : Logging exception.
+2026-06-19T23:02:50.867-04:00  INFO 25904 --- [pedido-service] [main] liquibase.ui                             : ERROR: Exception Details
+2026-06-19T23:02:50.867-04:00  INFO 25904 --- [pedido-service] [main] liquibase.ui                             : ERROR: Exception Primary Class:  ValidationFailedException
+2026-06-19T23:02:50.867-04:00  INFO 25904 --- [pedido-service] [main] liquibase.ui                             : ERROR: Exception Primary Reason:  Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+2026-06-19T23:02:50.867-04:00  INFO 25904 --- [pedido-service] [main] liquibase.ui                             : ERROR: Exception Primary Source:  4.29.2
+2026-06-19T23:02:50.867-04:00  INFO 25904 --- [pedido-service] [main] liquibase.command                        : Command execution complete
+2026-06-19T23:02:50.869-04:00  WARN 25904 --- [pedido-service] [main] o.s.w.c.s.GenericWebApplicationContext   : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'liquibase' defined in class path resource [com/example/pedido_service/config/LiquibaseConfig.class]: liquibase.exception.CommandExecutionException: liquibase.exception.ValidationFailedException: Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+2026-06-19T23:02:50.870-04:00  INFO 25904 --- [pedido-service] [main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-06-19T23:02:50.874-04:00  INFO 25904 --- [pedido-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-06-19T23:02:50.885-04:00  INFO 25904 --- [pedido-service] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-06-19T23:02:50.911-04:00  INFO 25904 --- [pedido-service] [main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-06-19T23:02:50.952-04:00 ERROR 25904 --- [pedido-service] [main] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'liquibase' defined in class path resource [com/example/pedido_service/config/LiquibaseConfig.class]: liquibase.exception.CommandExecutionException: liquibase.exception.ValidationFailedException: Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1817) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:603) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1218) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1184) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:994) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$2(SpringBootContextLoader.java:155) ~[spring-boot-test-4.0.5.jar:4.0.5]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58) ~[spring-core-7.0.6.jar:7.0.6]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46) ~[spring-core-7.0.6.jar:7.0.6]
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1465) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:600) ~[spring-boot-test-4.0.5.jar:4.0.5]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:155) ~[spring-boot-test-4.0.5.jar:4.0.5]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:114) ~[spring-boot-test-4.0.5.jar:4.0.5]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:247) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.lambda$loadContext$0(DefaultCacheAwareContextLoaderDelegate.java:167) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.cache.DefaultContextCache.put(DefaultContextCache.java:214) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:160) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:128) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:200) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:139) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:260) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:210) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$1(ClassBasedTestDescriptor.java:423) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:428) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$0(ClassBasedTestDescriptor.java:422) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:215) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:215) ~[na:na]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:636) ~[na:na]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:422) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$0(ClassBasedTestDescriptor.java:334) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:333) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$1(ClassBasedTestDescriptor.java:322) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.Optional.orElseGet(Optional.java:364) ~[na:na]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$0(ClassBasedTestDescriptor.java:321) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:27) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:127) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:126) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:70) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$0(NodeTestTask.java:144) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:144) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:110) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.apache.maven.surefire.api.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:125) ~[surefire-api-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithCancellationToken(LauncherAdapter.java:68) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:54) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.5.jar:3.5.5]
+Caused by: liquibase.exception.UnexpectedLiquibaseException: liquibase.exception.CommandExecutionException: liquibase.exception.ValidationFailedException: Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:267) ~[liquibase-core-4.29.2.jar:na]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1864) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1813) ~[spring-beans-7.0.6.jar:7.0.6]
+	... 109 common frames omitted
+Caused by: liquibase.exception.CommandExecutionException: liquibase.exception.ValidationFailedException: Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+	at liquibase.command.CommandScope.execute(CommandScope.java:258) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.lambda$update$0(Liquibase.java:216) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.lambda$child$0(Scope.java:191) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:200) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:190) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:169) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.runInScope(Liquibase.java:1329) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.update(Liquibase.java:205) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.update(Liquibase.java:188) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.integration.spring.SpringLiquibase.performUpdate(SpringLiquibase.java:305) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.integration.spring.SpringLiquibase.lambda$afterPropertiesSet$0(SpringLiquibase.java:257) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.lambda$child$0(Scope.java:191) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:200) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:190) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:169) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:257) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:250) ~[liquibase-core-4.29.2.jar:na]
+	... 111 common frames omitted
+Caused by: liquibase.exception.ValidationFailedException: Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+	at liquibase.changelog.DatabaseChangeLog.validate(DatabaseChangeLog.java:398) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.command.core.helpers.DatabaseChangelogCommandStep.run(DatabaseChangelogCommandStep.java:92) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.command.CommandScope.execute(CommandScope.java:220) ~[liquibase-core-4.29.2.jar:na]
+	... 127 common frames omitted
+
+2026-06-19T23:02:50.972-04:00  WARN 25904 --- [pedido-service] [main] o.s.test.context.TestContextManager      : Caught exception while allowing TestExecutionListener [org.springframework.test.context.web.ServletTestExecutionListener] to prepare test instance [com.example.pedido_service.PedidoServiceApplicationTests@508b3a48]
+
+java.lang.IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@c4b4f68 testClass = com.example.pedido_service.PedidoServiceApplicationTests, locations = [], classes = [com.example.pedido_service.PedidoServiceApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [org.springframework.boot.web.server.context.SpringBootTestRandomPortContextCustomizer@4e08acf9, org.springframework.boot.test.context.PropertyMappingContextCustomizer@0, org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@2436ea2f, org.springframework.boot.test.http.client.DisableReactorResourceFactoryGlobalResourcesContextCustomizerFactory$DisableReactorResourceFactoryGlobalResourcesContextCustomizerCustomizer@2f37f1f9, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@48528634, org.springframework.boot.test.autoconfigure.OnFailureConditionReportContextCustomizerFactory$OnFailureConditionReportContextCustomizer@146dcfe6, org.springframework.test.context.support.DynamicPropertiesContextCustomizer@0, org.springframework.boot.test.context.SpringBootTestAnnotation@a07ff5f1], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.lambda$loadContext$0(DefaultCacheAwareContextLoaderDelegate.java:195) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.cache.DefaultContextCache.put(DefaultContextCache.java:214) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:160) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:128) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:200) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:139) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:260) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:210) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$1(ClassBasedTestDescriptor.java:423) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:428) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$0(ClassBasedTestDescriptor.java:422) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:215) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:215) ~[na:na]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:636) ~[na:na]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:422) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$0(ClassBasedTestDescriptor.java:334) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:333) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$1(ClassBasedTestDescriptor.java:322) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.Optional.orElseGet(Optional.java:364) ~[na:na]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$0(ClassBasedTestDescriptor.java:321) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:27) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:127) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:126) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:70) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$0(NodeTestTask.java:144) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:144) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:110) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.apache.maven.surefire.api.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:125) ~[surefire-api-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithCancellationToken(LauncherAdapter.java:68) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:54) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.5.jar:3.5.5]
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'liquibase' defined in class path resource [com/example/pedido_service/config/LiquibaseConfig.class]: liquibase.exception.CommandExecutionException: liquibase.exception.ValidationFailedException: Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1817) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:603) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1218) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1184) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:994) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621) ~[spring-context-7.0.6.jar:7.0.6]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$2(SpringBootContextLoader.java:155) ~[spring-boot-test-4.0.5.jar:4.0.5]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58) ~[spring-core-7.0.6.jar:7.0.6]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46) ~[spring-core-7.0.6.jar:7.0.6]
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1465) ~[spring-boot-4.0.5.jar:4.0.5]
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:600) ~[spring-boot-test-4.0.5.jar:4.0.5]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:155) ~[spring-boot-test-4.0.5.jar:4.0.5]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:114) ~[spring-boot-test-4.0.5.jar:4.0.5]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:247) ~[spring-test-7.0.6.jar:7.0.6]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.lambda$loadContext$0(DefaultCacheAwareContextLoaderDelegate.java:167) ~[spring-test-7.0.6.jar:7.0.6]
+	... 86 common frames omitted
+Caused by: liquibase.exception.UnexpectedLiquibaseException: liquibase.exception.CommandExecutionException: liquibase.exception.ValidationFailedException: Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:267) ~[liquibase-core-4.29.2.jar:na]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1864) ~[spring-beans-7.0.6.jar:7.0.6]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1813) ~[spring-beans-7.0.6.jar:7.0.6]
+	... 109 common frames omitted
+Caused by: liquibase.exception.CommandExecutionException: liquibase.exception.ValidationFailedException: Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+	at liquibase.command.CommandScope.execute(CommandScope.java:258) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.lambda$update$0(Liquibase.java:216) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.lambda$child$0(Scope.java:191) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:200) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:190) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:169) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.runInScope(Liquibase.java:1329) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.update(Liquibase.java:205) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Liquibase.update(Liquibase.java:188) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.integration.spring.SpringLiquibase.performUpdate(SpringLiquibase.java:305) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.integration.spring.SpringLiquibase.lambda$afterPropertiesSet$0(SpringLiquibase.java:257) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.lambda$child$0(Scope.java:191) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:200) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:190) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:169) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.Scope.child(Scope.java:257) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:250) ~[liquibase-core-4.29.2.jar:na]
+	... 111 common frames omitted
+Caused by: liquibase.exception.ValidationFailedException: Validation Failed:
+     2 changesets check sum
+          db/changelog/db.changelog.sql::1::author was: 9:3260adac1cab65aa4bdff8471594b56e but is now: 9:7f8cc3509df30762c4e486587ffaedb5
+          db/changelog/db.changelog.sql::2::author was: 9:00ad167b71a2693fce8d06276e850e25 but is now: 9:019e712d88c57f64dce1b3e03c650d12
+
+	at liquibase.changelog.DatabaseChangeLog.validate(DatabaseChangeLog.java:398) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.command.core.helpers.DatabaseChangelogCommandStep.run(DatabaseChangelogCommandStep.java:92) ~[liquibase-core-4.29.2.jar:na]
+	at liquibase.command.CommandScope.execute(CommandScope.java:220) ~[liquibase-core-4.29.2.jar:na]
+	... 127 common frames omitted
+
+2026-06-19T23:02:53.229-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Iniciando guardar pedido: idCliente=1
+2026-06-19T23:02:53.248-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Pedido guardado exitosamente id=1, total=48000.0
+2026-06-19T23:02:53.296-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Iniciando guardar pedido: idCliente=1
+2026-06-19T23:02:53.298-04:00  WARN 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Cliente no encontrado id=1
+2026-06-19T23:02:53.310-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Eliminando pedido id=1
+2026-06-19T23:02:53.311-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Pedido eliminado exitosamente id=1
+2026-06-19T23:02:53.319-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Actualizando pedido id=1
+2026-06-19T23:02:53.320-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Pedido actualizado exitosamente id=1
+2026-06-19T23:02:53.331-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Buscando pedido id=99
+2026-06-19T23:02:53.331-04:00  WARN 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Pedido no encontrado id=99
+2026-06-19T23:02:53.338-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Buscando pedido id=1
+2026-06-19T23:02:53.358-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Iniciando guardar pedido: idCliente=1
+2026-06-19T23:02:53.360-04:00 ERROR 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Error al conectar con cliente-service: Connection timeout
+
+java.lang.RuntimeException: Connection timeout
+	at com.example.pedido_service.service.PedidoService.guardar(PedidoService.java:34) ~[classes/:na]
+	at com.example.pedido_service.service.PedidoServiceTest.lambda$guardar_conFalloDeConexionAClienteService_deberiaLanzarExternalServiceException$0(PedidoServiceTest.java:117) ~[test-classes/:na]
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:54) ~[junit-jupiter-api-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35) ~[junit-jupiter-api-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3223) ~[junit-jupiter-api-6.0.3.jar:6.0.3]
+	at com.example.pedido_service.service.PedidoServiceTest.guardar_conFalloDeConexionAClienteService_deberiaLanzarExternalServiceException(PedidoServiceTest.java:116) ~[test-classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:701) ~[junit-platform-commons-6.0.3.jar:6.0.3]
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:502) ~[junit-platform-commons-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.support.MethodReflectionUtils.invoke(MethodReflectionUtils.java:45) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:61) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:124) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:163) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:148) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:123) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:105) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:99) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:66) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:47) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:39) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:104) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:98) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invokeVoid(InterceptingExecutableInvoker.java:71) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$0(TestMethodTestDescriptor.java:219) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:215) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:157) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:70) ~[junit-jupiter-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:176) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604) ~[na:na]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58) ~[junit-platform-engine-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58) ~[junit-platform-launcher-6.0.3.jar:6.0.3]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.apache.maven.surefire.api.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:125) ~[surefire-api-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithCancellationToken(LauncherAdapter.java:68) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:54) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136) ~[surefire-junit-platform-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) ~[surefire-booter-3.5.5.jar:3.5.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) ~[surefire-booter-3.5.5.jar:3.5.5]
+
+2026-06-19T23:02:53.369-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Actualizando pedido id=99
+2026-06-19T23:02:53.378-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Iniciando guardar pedido: idCliente=1
+2026-06-19T23:02:53.386-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Listando todos los pedidos
+2026-06-19T23:02:53.387-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Total pedidos: 2
+2026-06-19T23:02:53.395-04:00  INFO 25904 --- [pedido-service] [main] c.e.p.service.PedidoService              : Eliminando pedido id=99

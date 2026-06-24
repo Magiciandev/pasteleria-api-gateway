@@ -1,0 +1,92 @@
+x-common-env: &common-env
+  SECRET: "esta_es_mi_compleja_clave_secreta"
+  SPRING_PROFILES_ACTIVE: "docker"
+
+services:
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "9090:9090"
+    environment:
+      <<: *common-env
+    depends_on:
+      - auth-service
+      - cliente-service
+      - empleado-service
+      - producto-service
+      - pedido-service
+      - asistencia-service
+      - envio-service
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "9097:9097"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  cliente-service:
+    build: ./cliente-service
+    ports:
+      - "9091:9091"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - auth-service
+
+  empleado-service:
+    build: ./empleado-service
+    ports:
+      - "9092:9092"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  producto-service:
+    build: ./producto-service
+    ports:
+      - "9093:9093"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  pedido-service:
+    build: ./pedido-service
+    ports:
+      - "9094:9094"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - cliente-service
+
+  asistencia-service:
+    build: ./asistencia-service
+    ports:
+      - "9095:9095"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - empleado-service
+
+  envio-service:
+    build: ./envio-service
+    ports:
+      - "9096:9096"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - cliente-service
+      - pedido-service
