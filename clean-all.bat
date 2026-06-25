@@ -13,7 +13,7 @@ FOR /f "tokens=*" %%i IN ('docker images --filter "reference=pasteleria-*" -q') 
 
 echo.
 echo [3/4] Eliminando carpetas target de cada microservicio...
-FOR %%s IN (api-gateway auth-service cliente-service producto-service pedido-service envio-service empleado-service asistencia-service) DO (
+FOR %%s IN (api-gateway auth-service cliente-service producto-service pedido-service envio-service empleado-service asistencia-service proveedor-service) DO (
     IF EXIST "%%s\target" (
         echo   Borrando %%s\target
         rmdir /s /q "%%s\target"
