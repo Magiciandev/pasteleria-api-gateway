@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: proveedor-service
+  profiles:
+    active: dev
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/bd_proveedor?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true
+
+server:
+  port: 9098
+
+logging:
+  level:
+    com.example.proveedor_service: DEBUG
+  file:
+    name: logs/proveedor-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:mysql://host.docker.internal:3306/bd_proveedor?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true
+
+server:
+  port: 9098
+
+logging:
+  level:
+    com.example.proveedor_service: INFO
+  file:
+    name: logs/proveedor-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html

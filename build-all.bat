@@ -27,5 +27,8 @@ call .\mvnw clean package -DskipTests
 cd ..\envio-service
 call .\mvnw clean package -DskipTests
 
+cd ..\proveedor-service
+call .\mvnw clean package -DskipTests
+
 cd ..
 docker compose up --build

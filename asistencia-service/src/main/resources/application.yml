@@ -3,7 +3,11 @@ spring:
     name: asistencia-service
   profiles:
     active: dev
-
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
 ---
 spring:
   config:

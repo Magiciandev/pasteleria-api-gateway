@@ -9,6 +9,7 @@ import com.example.envio_service.model.Envio;
 import com.example.envio_service.dto.EnvioDTO;
 import com.example.envio_service.service.EnvioService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,41 +36,77 @@ public class EnvioController {
     @GetMapping
     public ResponseEntity<List<EnvioDTO>> listar() {
         logger.info("GET /envios - Listando envios");
-        List<EnvioDTO> dtos = envioService.listar().stream().map(EnvioDTO::fromModel).collect(Collectors.toList());
+        List<EnvioDTO> dtos = envioService.listar().stream()
+                .map(EnvioDTO::fromModel).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EnvioDTO> obtenerPorId(@PathVariable Long id) {
         logger.info("GET /envios/{} - Obteniendo envio", id);
-        return ResponseEntity.ok(EnvioDTO.fromModel(envioService.buscarPorId(id)));
+        try {
+            Envio envio = envioService.buscarPorId(id);
+            if (envio == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(EnvioDTO.fromModel(envio));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @GetMapping("/cliente/{idCliente}")
     public ResponseEntity<List<EnvioDTO>> obtenerPorCliente(@PathVariable Long idCliente) {
-        List<EnvioDTO> dtos = envioService.buscarPorCliente(idCliente).stream().map(EnvioDTO::fromModel).collect(Collectors.toList());
+        logger.info("GET /envios/cliente/{} - Obteniendo envios por cliente", idCliente);
+        List<EnvioDTO> dtos = envioService.buscarPorCliente(idCliente).stream()
+                .map(EnvioDTO::fromModel).collect(Collectors.toList());
+        if (dtos.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/pedido/{idPedido}")
     public ResponseEntity<EnvioDTO> obtenerPorPedido(@PathVariable Long idPedido) {
-        Optional<Envio> envio = envioService.buscarPorPedido(idPedido);
-        return envio.map(e -> ResponseEntity.ok(EnvioDTO.fromModel(e)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        logger.info("GET /envios/pedido/{} - Obteniendo envio por pedido", idPedido);
+        try {
+            Optional<Envio> envio = envioService.buscarPorPedido(idPedido);
+            return envio.map(e -> ResponseEntity.ok(EnvioDTO.fromModel(e)))
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}/estado")
     public ResponseEntity<EnvioDTO> actualizarEstado(@PathVariable Long id, @RequestBody EstadoRequest request) {
         logger.info("PUT /envios/{}/estado - Actualizando a {}", id, request.getEstado());
-        Envio actualizado = envioService.actualizarEstado(id, request.getEstado());
-        return ResponseEntity.ok(EnvioDTO.fromModel(actualizado));
+        try {
+            Envio actualizado = envioService.actualizarEstado(id, request.getEstado());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(EnvioDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
         logger.info("DELETE /envios/{} - Eliminando envio", id);
-        envioService.eliminar(id);
-        return ResponseEntity.ok("Envio eliminado exitosamente");
+        try {
+            Envio envio = envioService.buscarPorId(id);
+            if (envio == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Envio no encontrado");
+            }
+            
+            envioService.eliminar(id);
+            logger.info("Envio eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Envio eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar el envio");
+        }
     }
 
     public static class EstadoRequest {

@@ -9,6 +9,7 @@ import com.example.empleado_service.dto.EmpleadoDTO;
 import com.example.empleado_service.model.Empleado;
 import com.example.empleado_service.service.EmpleadoService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,10 +26,10 @@ public class EmpleadoController {
 
     @PostMapping
     public ResponseEntity<EmpleadoDTO> crearEmpleado(@Valid @RequestBody EmpleadoDTO dto) {
-        logger.info("POST /empleados - Creando empleado: nombre={}", dto.getNombre());
-        Empleado guardado = empleadoService.guardar(dto.toModel());
-        logger.info("Empleado creado exitosamente id={}", guardado.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(EmpleadoDTO.fromModel(guardado));
+        logger.info("POST /empleados - Creando empleado");
+        Empleado nuevo = empleadoService.guardar(dto.toModel());
+        logger.info("Empleado creado exitosamente id={}", nuevo.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(EmpleadoDTO.fromModel(nuevo));
     }
 
     @GetMapping
@@ -36,46 +37,51 @@ public class EmpleadoController {
         logger.info("GET /empleados - Listando empleados");
         List<EmpleadoDTO> dtos = empleadoService.listar().stream()
                 .map(EmpleadoDTO::fromModel).collect(Collectors.toList());
-        logger.info("Total empleados listados: {}", dtos.size());
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmpleadoDTO> obtenerEmpleado(@PathVariable Long id) {
+    public ResponseEntity<EmpleadoDTO> obtenerPorId(@PathVariable Long id) {
         logger.info("GET /empleados/{} - Obteniendo empleado", id);
-        return ResponseEntity.ok(EmpleadoDTO.fromModel(empleadoService.buscarPorId(id)));
-    }
-
-    @GetMapping("/rut/{rut}")
-    public ResponseEntity<EmpleadoDTO> obtenerEmpleadoPorRut(@PathVariable String rut) {
-        logger.info("GET /empleados/rut/{} - Buscando empleado", rut);
-        return ResponseEntity.ok(EmpleadoDTO.fromModel(empleadoService.buscarPorRut(rut)));
-    }
-
-    @GetMapping("/cargo/{cargo}")
-    public ResponseEntity<List<EmpleadoDTO>> obtenerEmpleadosPorCargo(@PathVariable String cargo) {
-        List<EmpleadoDTO> dtos = empleadoService.buscarPorCargo(cargo).stream()
-                .map(EmpleadoDTO::fromModel).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
-    }
-
-    @GetMapping("/activos")
-    public ResponseEntity<List<EmpleadoDTO>> listarActivos() {
-        List<EmpleadoDTO> dtos = empleadoService.listarActivos().stream()
-                .map(EmpleadoDTO::fromModel).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        try {
+            Empleado empleado = empleadoService.buscarPorId(id);
+            if (empleado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(EmpleadoDTO.fromModel(empleado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmpleadoDTO> actualizarEmpleado(@PathVariable Long id, @Valid @RequestBody EmpleadoDTO dto) {
+    public ResponseEntity<EmpleadoDTO> actualizar(@PathVariable Long id, @Valid @RequestBody EmpleadoDTO dto) {
         logger.info("PUT /empleados/{} - Actualizando empleado", id);
-        return ResponseEntity.ok(EmpleadoDTO.fromModel(empleadoService.actualizar(id, dto.toModel())));
+        try {
+            Empleado actualizado = empleadoService.actualizar(id, dto.toModel());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(EmpleadoDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarEmpleado(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(@PathVariable Long id) {
         logger.info("DELETE /empleados/{} - Eliminando empleado", id);
-        empleadoService.eliminar(id);
-        return ResponseEntity.ok("Empleado eliminado exitosamente");
+        try {
+            Empleado empleado = empleadoService.buscarPorId(id);
+            if (empleado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Empleado no encontrado");
+            }
+            
+            empleadoService.eliminar(id);
+            logger.info("Empleado eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Empleado eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar el empleado");
+        }
     }
 }

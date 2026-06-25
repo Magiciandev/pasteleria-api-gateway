@@ -679,6 +679,9 @@ call .\mvnw clean package -DskipTests
 cd ..\envio-service
 call .\mvnw clean package -DskipTests
 
+cd ..\proveedor-service
+call .\mvnw clean package -DskipTests
+
 cd ..
 docker compose up --build
 
@@ -843,6 +846,7 @@ services:
       - pedido-service
       - asistencia-service
       - envio-service
+      - proveedor-service
 
   auth-service:
     build: ./auth-service
@@ -915,6 +919,420 @@ services:
     depends_on:
       - cliente-service
       - pedido-service
+
+  proveedor-service:
+    build: ./proveedor-service
+    ports:
+      - "9098:9098"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+
+================================================================================
+ARCHIVO: GUIA_USO_PROYECTO.md
+================================================================================
+
+# 📘 Guía de Uso – Proyecto Microservicios "Pastelería"
+
+Guía paso a paso, en el orden correcto, para levantar el proyecto, probarlo con Swagger + ModHeader, y dejarlo listo para presentar. Guárdala y léela tal cual el día de la presentación: solo copia y pega los comandos en orden.
+
+---
+
+## 0. Mapa rápido del proyecto
+
+8 módulos Maven independientes. El **api-gateway** es la única puerta de entrada "oficial" (con seguridad JWT). Los otros 7 son microservicios que también se pueden golpear directo en su propio puerto (sin token) para debug rápido.
+
+| # | Servicio | Puerto | Base de datos | Ruta pública (vía Gateway) | ¿Necesita token? |
+|---|----------|--------|----------------|------------------------------|-------------------|
+| 1 | **api-gateway** | 9090 | — | `http://localhost:9090` | Es el que exige el token |
+| 2 | **auth-service** | 9097 | `bd_users` | `/auth/**` | ❌ No (es público) |
+| 3 | **cliente-service** | 9091 | `bd_cliente` | `/clientes/**` | ✅ Sí |
+| 4 | **empleado-service** | 9092 | `bd_empleado` | `/empleados/**` | ✅ Sí |
+| 5 | **producto-service** | 9093 | `bd_producto` | `/productos/**` | ✅ Sí |
+| 6 | **pedido-service** | 9094 | `bd_pedidos` | `/pedidos/**` | ✅ Sí |
+| 7 | **asistencia-service** | 9095 | `bd_asistencia` | `/asistencias/**` | ✅ Sí |
+| 8 | **envio-service** | 9096 | `bd_envio` | `/envios/**` | ✅ Sí |
+
+**Importante:** ninguna base de datos corre dentro de Docker. `docker-compose.yml` **no** trae un contenedor MySQL — todos los servicios apuntan a `host.docker.internal:3306` (o `localhost:3306` si los corres sin Docker). **Por eso MySQL debe estar corriendo en tu PC (Workbench/XAMPP/servicio de Windows) antes de levantar cualquier cosa.** Usuario `root`, sin contraseña.
+
+Cada servicio crea su propia base de datos solo si no existe (`createDatabaseIfNotExist=true`), así que no hace falta crearlas a mano — solo borrarlas cuando quieras reiniciar todo de cero (ver paso 9).
+
+---
+
+## 1. Requisitos antes de empezar (una sola vez por PC)
+
+- **Java 21** instalado (todos los `pom.xml` lo exigen).
+- **MySQL** corriendo en `localhost:3306`, usuario `root`, sin password.
+- **Docker Desktop** abierto (si van a usar `build-all`).
+- **Postman** o el navegador para pegar URLs.
+- Extensión **ModHeader** instalada en Chrome/Edge (para inyectar el token automáticamente).
+
+---
+
+## 2. Configurar ModHeader (se hace una sola vez, queda guardado)
+
+ModHeader sirve para no tener que pegar el header `Authorization` a mano en cada request del navegador.
+
+1. Abre la extensión ModHeader → crea un nuevo perfil.
+2. En **Request headers** agrega:
+   - **Name:** `Authorization`
+   - **Value:** `Bearer ` *(luego, en el paso 6, pegas el token detrás de "Bearer ")*
+3. En **Request URL filters** (o "Filters") pon esta regex para que el header solo se mande hacia el gateway y no se filtre a otras páginas:
+   ```
+   .*localhost:9090.*
+   ```
+4. Activa el switch del perfil (ON).
+
+Con esto, **toda** petición que vaya a `localhost:9090` (Swagger, endpoints, lo que sea) llevará el token automáticamente.
+
+> ⚠️ El token dura **1 hora**. Si pasa ese tiempo y te empieza a tirar 401/403, vuelve a loguearte (paso 6) y reemplaza el valor en ModHeader.
+
+---
+
+## 3. Levantar TODO el proyecto (opción recomendada para el día de la presentación)
+
+Esto compila los 8 microservicios y levanta todo con Docker en un solo comando.
+
+### Windows
+```bat
+build-all.bat
+```
+
+### Mac / Linux
+```bash
+./build-all.sh
+```
+
+¿Qué hace exactamente, en orden?
+1. Borra contenedores e imágenes Docker viejas.
+2. Compila cada microservicio (genera el `.jar`) en este orden: `api-gateway → auth-service → cliente-service → empleado-service → producto-service → pedido-service → asistencia-service → envio-service`.
+3. Ejecuta `docker compose up --build`, que construye las 8 imágenes y levanta los 8 contenedores, cada uno publicado en su puerto (tabla del punto 0).
+
+Espera a ver en consola que los 8 servicios terminaron de iniciar (Spring Boot imprime "Started ___Application" para cada uno). Recién ahí están todos arriba.
+
+---
+
+## 4. Alternativa: levantar servicio por servicio sin Docker (para programar/debuggear)
+
+Útil cuando estás modificando código de un solo servicio y no quieres reconstruir todo Docker cada vez. Necesitas una terminal por servicio.
+
+**Windows:**
+```bat
+cd nombre-del-servicio
+.\mvnw.cmd spring-boot:run
+```
+
+**Mac / Linux:**
+```bash
+cd nombre-del-servicio
+./mvnw spring-boot:run
+```
+
+Orden recomendado de arranque (algunos servicios validan datos contra otros al iniciar, vía Liquibase + WebClient):
+
+1. `cliente-service` (9091)
+2. `empleado-service` (9092)
+3. `producto-service` (9093)
+4. `pedido-service` (9094) — necesita a cliente y producto arriba
+5. `asistencia-service` (9095) — necesita a empleado arriba
+6. `envio-service` (9096) — necesita a cliente y pedido arriba
+7. `auth-service` (9097)
+8. `api-gateway` (9090) — al final, porque solo enruta hacia los demás
+
+---
+
+## 5. Ejecutar los tests automáticos
+
+Antes de presentar, no está de más correr los tests de cada módulo para confirmar que compila y pasa:
+
+**Windows:**
+```bat
+cd nombre-del-servicio
+.\mvnw.cmd test
+```
+
+**Mac / Linux:**
+```bash
+cd nombre-del-servicio
+./mvnw test
+```
+
+(Repite cambiando de carpeta para cada uno de los 8 servicios, o usa `build-all`, que ya compila — `test` solo es necesario si quieres ver el detalle de los `@Test`.)
+
+---
+
+## 6. Autenticarse: registrar usuario y obtener el token
+
+Todo pasa por el **gateway, puerto 9090**. `/auth/**` es la única ruta pública; todo lo demás exige el token.
+
+### 6.1 Registrar usuario
+`POST http://localhost:9090/auth/register`
+
+Body (JSON):
+```json
+{
+  "email": "hola@ejemplo.com",
+  "password": "123123"
+}
+```
+
+### 6.2 Iniciar sesión (obtener el token)
+`POST http://localhost:9090/auth/login`
+
+Mismo body que arriba. La respuesta es:
+```json
+{
+  "status": "ok",
+  "token": "eyJhbGciOiJIUzI1NiJ9....."
+}
+```
+
+### 6.3 Activar el token en ModHeader
+Copia el valor de `"token"` y pégalo en ModHeader (paso 2), quedando así:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.....
+```
+
+Desde este momento, cualquier endpoint protegido (`/clientes`, `/productos`, `/pedidos`, etc.) funcionará al navegarlo o probarlo a través del puerto **9090**.
+
+> 💡 Tip para la demo en vivo: antes de loguearte, intenta abrir `http://localhost:9090/clientes` — te va a tirar 401/403. Eso demuestra que la seguridad del gateway funciona. Después de pegar el token en ModHeader, la misma URL responde con datos. Es una buena forma de mostrarle al profesor que el JWT realmente está protegiendo las rutas.
+
+---
+
+## 7. Explorar la API con Swagger
+
+Hay dos formas. La dirección que tenías apuntada (`http://localhost:9090/doc/swagger-ui.html`) **no existe** así en el gateway — el gateway no tiene su propio Swagger, solo enruta hacia el de cada microservicio. Usa una de estas dos en su lugar:
+
+### Opción A — Directo a cada servicio (la más simple, NO pide token)
+Como la seguridad JWT solo vive en el api-gateway, si entras directo al puerto del microservicio no te pide login. Ideal para probar CRUD rápido.
+
+| Servicio | URL Swagger |
+|---|---|
+| auth-service | `http://localhost:9097/doc/swagger-ui.html` |
+| cliente-service | `http://localhost:9091/doc/swagger-ui.html` |
+| empleado-service | `http://localhost:9092/doc/swagger-ui.html` |
+| producto-service | `http://localhost:9093/doc/swagger-ui.html` |
+| pedido-service | `http://localhost:9094/doc/swagger-ui.html` |
+| asistencia-service | `http://localhost:9095/doc/swagger-ui.html` |
+| envio-service | `http://localhost:9096/doc/swagger-ui.html` |
+
+### Opción B — A través del Gateway (puerto 9090, SÍ pide token vía ModHeader)
+Sirve para demostrar la arquitectura completa con seguridad. Nota que la ruta usa `/doc/swagger-ui/index.html` (con `/index.html`, no `.html` solo) y el nombre del servicio como prefijo:
+
+```
+http://localhost:9090/cliente-service/doc/swagger-ui/index.html
+http://localhost:9090/empleado-service/doc/swagger-ui/index.html
+http://localhost:9090/producto-service/doc/swagger-ui/index.html
+http://localhost:9090/pedido-service/doc/swagger-ui/index.html
+http://localhost:9090/asistencia-service/doc/swagger-ui/index.html
+http://localhost:9090/envio-service/doc/swagger-ui/index.html
+http://localhost:9090/auth-service/doc/swagger-ui/index.html
+```
+
+Con ModHeader activado (paso 6.3), tanto la página como los botones "Try it out" funcionarán porque el header viaja con cada llamada al puerto 9090.
+
+---
+
+## 8. Referencia rápida de endpoints (para no andar adivinando en Postman)
+
+> Todos se piden con el prefijo del Gateway `http://localhost:9090...` (o directo al puerto del servicio sin prefijo extra, ver tabla del punto 0). Los que dicen "v2" devuelven el mismo recurso pero con formato HATEOAS (con links).
+
+**auth-service** (`/auth`, público)
+```
+POST   /auth/register
+POST   /auth/login
+GET    /auth/user/{email}/exists
+```
+
+**cliente-service** (`/clientes`)
+```
+POST   /clientes
+GET    /clientes
+GET    /clientes/{id}
+PUT    /clientes/{id}
+DELETE /clientes/{id}
+GET    /clientes/total
+GET    /clientes/correo/{correo}
+GET    /clientes/nombre/{nombre}
+GET    /clientes/{id}/exists
+GET    /clientes/v2          (HATEOAS)
+```
+
+Ejemplo de body para crear cliente:
+```json
+{
+  "rutCliente": "12345678-9",
+  "nombre": "Juan Perez",
+  "correo": "juan@correo.com",
+  "telefono": "+56912345678",
+  "direccion": "Calle Falsa 123"
+}
+```
+
+**empleado-service** (`/empleados`)
+```
+POST   /empleados
+GET    /empleados
+GET    /empleados/{id}
+GET    /empleados/rut/{rut}
+GET    /empleados/cargo/{cargo}
+GET    /empleados/activos
+PUT    /empleados/{id}
+DELETE /empleados/{id}
+GET    /empleados/v2          (HATEOAS)
+```
+
+**producto-service** (`/productos`)
+```
+POST   /productos
+GET    /productos
+GET    /productos/{id}
+GET    /productos/{id}/detalles
+GET    /productos/{id}/exists
+PUT    /productos/{id}
+DELETE /productos/{id}
+GET    /productos/v2          (HATEOAS)
+```
+
+**pedido-service** (`/pedidos`)
+```
+POST   /pedidos
+GET    /pedidos
+GET    /pedidos/{id}
+GET    /pedidos/cliente/{idCliente}
+GET    /pedidos/total
+PUT    /pedidos/{id}
+DELETE /pedidos/{id}
+GET    /pedidos/v2          (HATEOAS)
+```
+
+**asistencia-service** (`/asistencias`)
+```
+POST   /asistencias
+GET    /asistencias
+GET    /asistencias/{id}
+GET    /asistencias/empleado/{idEmpleado}
+GET    /asistencias/fecha/{fecha}
+GET    /asistencias/empleado/{idEmpleado}/fecha/{fecha}
+PUT    /asistencias/{id}
+DELETE /asistencias/{id}
+GET    /asistencias/v2          (HATEOAS)
+```
+
+**envio-service** (`/envios`)
+```
+POST   /envios
+GET    /envios
+GET    /envios/{id}
+GET    /envios/cliente/{idCliente}
+GET    /envios/pedido/{idPedido}
+PUT    /envios/{id}/estado
+DELETE /envios/{id}
+GET    /envios/v2          (HATEOAS)
+```
+
+---
+
+## 9. Limpiar todo (antes de re-presentar o cuando algo se traba)
+
+Hay dos niveles de limpieza: **código/Docker** y **bases de datos**. Normalmente con el primero te alcanza.
+
+### 9.1 Limpieza de Docker y carpetas `target` (no toca las bases de datos)
+
+**Windows:**
+```bat
+clean-all.bat
+```
+**Mac / Linux:**
+```bash
+./clean-all.sh
+```
+
+Hace, en orden: 1) `docker compose down --remove-orphans`, 2) borra imágenes `pasteleria-*`, 3) borra la carpeta `target` de cada uno de los 8 módulos, 4) `docker volume prune -f`. Queda todo listo para volver a correr `build-all`.
+
+### 9.2 Reseteo total de datos (borra TODA la información, vuelve a foja cero)
+
+Solo si quieres que los datos de prueba se vuelvan a cargar desde Liquibase tal como el primer día. Ejecuta esto en MySQL Workbench / consola `mysql -u root`:
+
+```sql
+DROP DATABASE bd_cliente;
+DROP DATABASE bd_envio;
+DROP DATABASE bd_pedidos;
+DROP DATABASE bd_producto;
+DROP DATABASE bd_users;
+DROP DATABASE bd_empleado;
+DROP DATABASE bd_asistencia;
+```
+
+Después de soltar las bases, vuelve a correr `build-all` (o `mvnw spring-boot:run` en cada servicio): cada Spring Boot las vuelve a crear vacías y Liquibase las llena de nuevo con los datos de prueba.
+
+> ⚠️ Esto borra TODO: clientes, productos, pedidos, usuarios registrados, etc. Hazlo solo si quieres reiniciar la demo desde cero, no minutos antes de presentar salvo que sea intencional.
+
+---
+
+## 10. ✅ Checklist mínimo para el día de la presentación
+
+Copy-paste en este orden exacto:
+
+1. ☐ Abrir MySQL (Workbench o el servicio) y confirmar que está corriendo en el puerto 3306.
+2. ☐ Abrir Docker Desktop.
+3. ☐ En la raíz del proyecto: `build-all.bat` (Windows) o `./build-all.sh` (Mac/Linux).
+4. ☐ Esperar a que los 8 servicios digan "Started" en consola.
+5. ☐ `POST http://localhost:9090/auth/register` con el JSON de ejemplo (paso 6.1).
+6. ☐ `POST http://localhost:9090/auth/login` → copiar el `token`.
+7. ☐ Pegar `Bearer <token>` en ModHeader (filtro `.*localhost:9090.*`, perfil activado).
+8. ☐ Probar `http://localhost:9090/clientes` (o cualquier otro) para confirmar que responde con datos.
+9. ☐ Mostrar Swagger directo en algún puerto de servicio (Opción A, paso 7) para las pruebas en vivo de CRUD.
+10. ☐ Si algo se traba a mitad de la demo: `clean-all.bat` → `build-all.bat` de nuevo.
+
+---
+
+## 11. Cómo incorporar el proyecto nuevo del profesor
+
+Como todavía no sabemos qué trae ese proyecto, esta es la receta general para integrarlo siguiendo exactamente la misma estructura que ya usa este repo (así queda "consolidado" y no se nota el pegado):
+
+1. **Decide qué es:** ¿es un microservicio nuevo (otra entidad/dominio) o son cambios sobre uno que ya existe (otro controller, otro campo)? Eso cambia el resto de los pasos.
+
+2. **Si es un microservicio nuevo:**
+   - Copia su carpeta a la raíz del proyecto, al mismo nivel que `cliente-service`, `producto-service`, etc.
+   - Asígnale un puerto libre siguiente en la serie (el último usado es `9097`, así que el nuevo podría ser `9098`).
+   - Crea su base de datos propia `bd_nombre` y configura `application.yml`/`application.properties` con el mismo patrón de los demás: perfil `dev` → `jdbc:mysql://localhost:3306/bd_nombre?createDatabaseIfNotExist=true`; perfil `docker` → `jdbc:mysql://host.docker.internal:3306/bd_nombre?createDatabaseIfNotExist=true`.
+   - Reordena el código para que respete los mismos paquetes que usa el resto: `model`, `dto`, `repository`, `service`, `controller`, `exception`, `config`, `assemblers` (si quieres que tenga también versión v2 con HATEOAS).
+   - Agrégale `springdoc-openapi-starter-webmvc-ui` al `pom.xml` y el bloque `springdoc.swagger-ui.path: /doc/swagger-ui.html` en el `application.yml`, igual que los demás, para que el Swagger directo le funcione igual.
+
+3. **Registra el nuevo servicio en `docker-compose.yml`** (raíz del proyecto), copiando el bloque de cualquier servicio existente y cambiando `build`, `ports` y `depends_on` según corresponda.
+
+4. **Agrégalo a `build-all.bat` / `build-all.sh` y a `clean-all.bat` / `clean-all.sh`**, sumando su nombre de carpeta a la lista de servicios que ya están ahí, para que se compile/limpie junto con los demás.
+
+5. **Dale ruta en el api-gateway** (`api-gateway/src/main/resources/application.yml`): copia uno de los bloques de ruta existentes (por ejemplo el de `producto-service`) y reemplaza el `id`, `uri` y `Path` por los del servicio nuevo, agregando también sus dos rutas extra de `v3/api-docs` y `doc/swagger-ui`.
+
+6. **Si el nuevo servicio necesita llamar a otro ya existente** (por ejemplo, valida que un cliente exista), copia el patrón `WebClientConfig.java` + DTO espejo que ya usan `pedido-service` o `envio-service` para llamar a `cliente-service`.
+
+7. **Si tiene datos de prueba con IDs que referencian otro servicio** (como pasó con `pedido-service` referenciando productos), revisa que esos IDs realmente existan en el otro servicio — si no, el `changelog.sql` de Liquibase falla en silencio y simplemente no inserta nada (ese bug ya se dio en este proyecto, revisa `ARREGLOS_REALIZADOS.md` si quieres ver cómo se solucionó la última vez).
+
+8. **Compila y corre solo ese servicio primero** (`mvnw spring-boot:run`) antes de meterlo al `build-all`, para depurarlo más rápido sin reconstruir Docker entero cada vez.
+
+9. **Una vez que funciona suelto, corre `build-all` completo** para confirmar que conviven todos juntos, y prueba su Swagger y sus rutas a través del gateway con ModHeader, igual que el resto.
+
+---
+
+## 12. Solución de problemas comunes
+
+| Problema | Causa probable | Solución |
+|---|---|---|
+| 401/403 al llamar `/clientes` (u otro) por el puerto 9090 | Token vencido o ModHeader apagado | Vuelve a loguearte (paso 6) y actualiza el valor en ModHeader |
+| "No se puede conectar a MySQL" al iniciar un servicio | MySQL no está corriendo, o corre en otro puerto | Verifica `mysql -u root -e "SELECT 1;"` y que escuche en 3306 |
+| Un servicio dice "Address already in use" en su puerto | Quedó un proceso anterior corriendo (o un contenedor viejo) | Cierra esa terminal/proceso, o `docker compose down`, y reintenta |
+| `pedido-service` o `envio-service` no traen datos de prueba | Liquibase insertó registros con IDs que no existen en otro servicio (ya pasó una vez) | Revisa que ese servicio dependiente esté arriba antes de levantar este, o mira `ARREGLOS_REALIZADOS.md` |
+| Swagger vía gateway da 404 | Falta el `/index.html` al final, o falta el nombre del servicio como prefijo | Usa exactamente `http://localhost:9090/<servicio>/doc/swagger-ui/index.html` |
+| `.\mvnw.cmd` falla con "MAVEN_HOME is not defined" o error de versión de Java | Java mal configurado en el PATH | Confirma `java -version` → debe decir 21; si no, instala/selecciona el JDK 21 |
+| Quiero ver qué hay en una base de datos sin entrar a Workbench | — | `mysql -u root bd_producto -e "SELECT * FROM producto;"` (cambia el nombre de la BD/tabla) |
+
+---
+
+**Resumen en una frase:** MySQL local arriba → `build-all` → registrarse y loguearse en `/auth` por el puerto 9090 → pegar el token en ModHeader → navegar `/clientes`, `/productos`, etc. por el 9090, o usar Swagger directo en cada puerto de servicio para probar CRUD sin token → `clean-all` cuando quieras reiniciar.
 
 
 ================================================================================
@@ -1193,6 +1611,164 @@ curl http://localhost:9092/empleados
 
 
 ================================================================================
+ARCHIVO: README General Pasteleria.md
+================================================================================
+
+# 🎂 Sistema de Gestión de Pastelería - Arquitectura de Microservicios
+
+Este repositorio contiene la documentación técnica y el código fuente del sistema integral de gestión para una pastelería automatizada. El proyecto está diseñado bajo un enfoque de **Arquitectura de Microservicios** altamente desacoplados, escalables y orientados al dominio, utilizando **Java 21 / 17**, **Spring Boot 4.0.5**, **Liquibase** para el control de versiones de bases de datos y **Docker** para la orquestación de contenedores.
+
+---
+
+## 🗺️ Arquitectura General del Sistema
+
+El ecosistema de la aplicación está compuesto por un **API Gateway** unificado como único punto de entrada perimetral y un conjunto de **7 microservicios de negocio y soporte** que se comunican entre sí de forma síncrona mediante **Spring WebClient**, incluyendo políticas de tolerancia a fallos (*fallback*).
+
+```
+                      ┌────────────────────────────────────────┐
+                      │       API GATEWAY (Puerto 9090)        │
+                      └───────────────────┬────────────────────┘
+                                          │
+       ┌──────────────┬───────────────┼───────────────┬──────────────┬──────────────┐
+       ▼              ▼               ▼               ▼              ▼              ▼
+┌────────────┐ ┌────────────┐  ┌────────────┐  ┌────────────┐ ┌────────────┐ ┌────────────┐
+│    Auth    │ │  Cliente   │  │  Producto  │  │   Pedido   │ │   Envío    │ │  Empleado  │
+│  Service   │ │  Service   │  │  Service   │  │  Service   │ │  Service   │ │  Service   │
+│   (9097)   │ │   (9091)   │  │   (9093)   │  │   (9094)   │ │   (9096)   │ │   (9092)   │
+└─────┬──────┘ └─────┬──────┘  └─────┬──────┘  └─────┬──────┘ └─────┬──────┘ └─────┬──────┘
+      │              │               │               │              │              │
+┌─────┴──────┐ ┌─────┴──────┐  ┌─────┴──────┐  ┌─────┴──────┐ ┌─────┴──────┐ ┌─────┴──────┐
+│  bd_auth   │ │ bd_cliente │  │ bd_producto│  │ bd_pedido  │ │  bd_envio  │ │ bd_empleado│
+└────────────┘ └────────────┘  └────────────┘  └────────────┘ └────────────┘ └─────┬──────┘
+                                                                                   │
+                                                                             ┌─────▼──────┐
+                                                                             │ Asistencia │
+                                                                             │  Service   │
+                                                                             │   (9095)   │
+                                                                             └─────┬──────┘
+                                                                             ┌─────▼──────┐
+                                                                             │bd_asistencia│
+                                                                             └────────────┘
+```
+
+---
+
+## 🧰 Stack Tecnológico Completo
+
+* **Lenguaje de Programación:** Java 21 / 17 (LTS)
+* **Framework Principal:** Spring Boot 4.0.5 & Spring Cloud Gateway
+* **Gestión de Dependencias:** Maven 3.x
+* **Persistencia de Datos:** Spring Data JPA / Hibernate
+* **Motores de Base de Datos:** MySQL 8.0 (Producción/Docker) & H2 Database (Entorno de Pruebas)
+* **Evolución del Esquema:** Liquibase 4.29.2
+* **Contenedorización:** Docker & Docker Compose
+* **Pruebas Unitarias y de Integración:** JUnit 5 (Jupiter), AssertJ, Mockito
+
+---
+
+## 📁 Catálogo de Microservicios y Puertos
+
+| Microservicio | Puerto | Base de Datos | Descripción Funcional |
+| :--- | :---: | :--- | :--- |
+| `api-gateway` | **9090** | *Ninguna* | Punto de acceso único. Enrutamiento dinámico y seguridad perimetral. |
+| `auth-service` | **9097** | `bd_auth` | Proveedor de identidad. Autenticación y emisión/validación de tokens JWT. |
+| `cliente-service` | **9091** | `bd_cliente` | Directorio maestro de clientes (RUT, datos de contacto y direcciones). |
+| `producto-service` | **9093** | `bd_producto` | Catálogo de productos terminados, insumos y gestión estricta de alérgenos. |
+| `pedido-service` | **9094** | `bd_pedido` | Motor transaccional de compras. Gestión de líneas de pedidos y cálculo de totales. |
+| `asistencia-service`| **9095** | `bd_asistencia`| Marcaje de jornadas laborales y cálculo de liquidaciones de horas extras. |
+| `envio-service` | **9096** | `bd_envio` | Gestión logística, asignación de despachos y tracking de entregas en tiempo real. |
+| `empleado-service` | **9092** | `bd_empleado` | Maestro del personal interno, cargos, sueldos base y contratos. |
+
+---
+
+## 🗄️ Diseño y Relaciones de Modelos de Datos
+
+### 1. Gestión de Alérgenos (`producto-service`)
+Implementa una relación **OneToOne** bidireccional limpia entre el producto y su ficha técnica médica, garantizando la eliminación atómica en cascada:
+* **Producto:** `id`, `nombre`, `precio`, `stock`.
+* **DetalleProducto:** `descripcion`, `contiene_lactosa` (boolean), `contiene_huevos` (boolean), `contiene_frutos_secos` (boolean), `contiene_gluten` (boolean), `alergenos` (textual), `instrucciones_almacenamiento`, `presentacion`.
+* *Configuración JPA:* `CascadeType.ALL` y `orphanRemoval = true`.
+
+### 2. Estructura Transaccional (`pedido-service`)
+Soporta el flujo de ventas mediante una composición **OneToMany** hacia los ítems del pedido:
+* **Pedido:** `id`, `id_cliente`, `nombre_cliente` (recuperado reactivamente), `fecha`, `total`, `estado` (*PENDIENTE, CONFIRMADO, ENTREGADO, CANCELADO*).
+* **DetallePedido:** `id`, `id_producto`, `nombre_producto`, `cantidad`, `precio_unitario`, `precio_total`.
+
+### 3. Logística Dinámica (`envio-service`)
+* **Envio:** `id`, `id_pedido`, `id_cliente`, `nombre_cliente`, `direccion_entrega`, `telefono`, `estado` (*PENDIENTE, EN_TRANSITO, ENTREGADO*), `costo_envio`.
+
+---
+
+## 🎯 Endpoints de la API (Acceso vía Gateway Puerto 9090)
+
+### 🧁 Catálogo de Productos
+* `POST /productos` - Registra un nuevo producto junto con su ficha de alérgenos.
+* `GET /productos` - Obtiene la lista completa de pastelería (retorna por defecto 10 productos base precargados).
+* `GET /productos/{id}` - Obtiene un producto por su clave primaria.
+* `GET /productos/{id}/detalles` - Endpoint especializado para extraer de forma aislada las restricciones de salud y alérgenos del producto.
+* `PUT /productos/{id}` - Modificación integral de datos comerciales y médicos.
+* `DELETE /productos/{id}` - Remoción física/lógica del producto y su detalle estructurado.
+
+### 🛒 Flujo de Pedidos
+* `POST /pedidos` - Generación de órdenes de compra. Consume de forma interna `cliente-service` y `producto-service` para validar existencias, calcular precios y consolidar los totales.
+* `GET /pedidos` - Recupera el histórico global de transacciones.
+* `GET /pedidos/cliente/{clienteId}` - Filtra dinámicamente las compras asociadas a un cliente específico.
+
+### 🚚 Logística y Despacho
+* `POST /envios` - Instancia una orden de despacho vinculada a un pedido confirmado.
+* `GET /envios/estado/{estado}` - Consulta optimizada para la indexación de despachos según su estado logístico (*PENDIENTE, EN_TRANSITO, ENTREGADO*).
+* `GET /envios/cliente/{clienteId}` - Listado de entregas destinadas a un cliente en particular.
+
+---
+
+## 🔧 Refactorizaciones y Mejoras Críticas del Sistema
+
+El código base fue sometido a una auditoría técnica profunda, resolviendo los siguientes incidentes:
+
+1.  **Sincronización en Liquibase (`pedido-service`):** Se corrigió un error crítico en el archivo de migración `db.changelog.sql` donde los registros semilla de la tabla `detalle_pedido` intentaban apuntar a llaves foráneas de productos inexistentes (IDs del `101` al `116`). Se remapearon los inserts para consumir de forma cíclica los IDs válidos del `1` al `10` generados por `producto-service`, logrando una inicialización limpia de la base de datos.
+2.  **Rendimiento en Base de Datos (`envio-service`):** Se eliminó una mala práctica arquitectónica en el controlador de envíos, la cual realizaba filtrados en memoria utilizando *Streams de Java* sobre colecciones globales (`.stream().filter(...)`). Esta lógica se delegó al motor de base de datos MySQL mediante la declaración explícitas de métodos de consulta derivados en `EnvioRepository` (`findByEstado` y `findByClienteId`), reduciendo drásticamente el consumo de CPU y memoria del microservicio.
+3.  **Tolerancia a Fallos e Integridad de Datos:** Se implementaron bloques de contingencia `try-catch` alrededor de las llamadas externas HTTP efectuadas por `WebClient` encapsulando excepciones del tipo `ExternalServiceException`. En caso de indisponibilidad temporal de un microservicio, el sistema activa un comportamiento degradado controlado en lugar de propagar un error de servidor interno (500).
+
+---
+
+## ⚡ Automatización y Scripts de Control
+
+Para facilitar la orquestación y el despliegue expedito de los 8 componentes, el proyecto dispone de scripts automatizados de consola para múltiples plataformas:
+
+### Compilación y Construcción Integral
+Compila los proyectos de forma secuencial omitiendo la suite de pruebas para acelerar el despliegue local, construye las imágenes Docker correspondientes y levanta el entorno de red unificado:
+* **En entornos Linux / macOS:** `./build-all.sh`
+* **En entornos Windows:** `.\build-all.bat`
+
+### Depuración y Limpieza Absoluta
+Detiene todos los contenedores en ejecución, remueve volúmenes persistidos, purga las imágenes exclusivas del negocio (`pasteleria-*`) y elimina de forma recursiva los directorios `/target` generados por Maven:
+* **En entornos Linux / macOS:** `./clean-all.sh`
+* **En entornos Windows:** `.\clean-all.bat`
+
+---
+
+## 🚀 Guía de Despliegue Rápido con Docker
+
+### Requisitos Mínimos
+* Docker Desktop con soporte para Docker Compose v2+.
+* Kit de Desarrollo de Java (JDK) 17 o 21 configurado en la variable de entorno `JAVA_HOME`.
+
+### Pasos para Inicializar el Cluster
+
+1.  Clone el repositorio y posiciónese en la raíz del espacio de trabajo.
+2.  Ejecute el script automatizado de construcción según su sistema operativo:
+    ```bash
+    ./build-all.sh
+    ```
+3.  Docker Compose levantará de forma ordenada las bases de datos, aplicará las migraciones de Liquibase y desplegará las instancias Java.
+4.  **Verificación del Catálogo Base:** Puede comprobar el correcto funcionamiento del Gateway y la ingesta de datos iniciales realizando una consulta HTTP:
+    ```bash
+    curl http://localhost:9090/productos
+    ```
+    *(Debería obtener un arreglo JSON con los 10 productos iniciales de la pastelería, tales como tortas, kuchenes y postres con sus respectivos detalles de alérgenos)*.
+
+
+================================================================================
 ARCHIVO: RESUMEN_PEDIDO_SERVICE.md
 ================================================================================
 
@@ -1430,52 +2006,6 @@ GET    /pedidos/total                Contar total
 
 
 ================================================================================
-ARCHIVO: api-gateway\HELP.md
-================================================================================
-
-# Read Me First
-The following was discovered as part of building this project:
-
-* The original package name 'com.example.api-gateway' is invalid and this project uses 'com.example.api_gateway' instead.
-
-# Getting Started
-
-### Reference Documentation
-For further reference, please consider the following sections:
-
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/4.0.5/maven-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/4.0.5/maven-plugin/build-image.html)
-* [Gateway](https://docs.spring.io/spring-cloud-gateway/reference/spring-cloud-gateway-server-webmvc.html)
-* [Spring Web](https://docs.spring.io/spring-boot/4.0.5/reference/web/servlet.html)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/4.0.5/reference/data/sql.html#data.sql.jpa-and-spring-data)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/4.0.5/reference/using/devtools.html)
-* [Rest Repositories](https://docs.spring.io/spring-boot/4.0.5/how-to/data-access.html#howto.data-access.exposing-spring-data-repositories-as-rest)
-* [Eureka Discovery Client](https://docs.spring.io/spring-cloud-netflix/reference/spring-cloud-netflix.html#_service_discovery_eureka_clients)
-
-### Guides
-The following guides illustrate how to use some features concretely:
-
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
-* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
-* [Accessing JPA Data with REST](https://spring.io/guides/gs/accessing-data-rest/)
-* [Accessing Neo4j Data with REST](https://spring.io/guides/gs/accessing-neo4j-data-rest/)
-* [Accessing MongoDB Data with REST](https://spring.io/guides/gs/accessing-mongodb-data-rest/)
-* [Service Registration and Discovery with Eureka and Spring Cloud](https://spring.io/guides/gs/service-registration-and-discovery/)
-
-### Maven Parent overrides
-
-Due to Maven's design, elements are inherited from the parent POM to the project POM.
-While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
-To prevent this, the project POM contains empty overrides for these elements.
-If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
-
-
-
-================================================================================
 ARCHIVO: api-gateway\pom.xml
 ================================================================================
 
@@ -1614,7 +2144,18 @@ public class SecurityConfig {
         return http
             .csrf(csrf -> csrf.disable())
             .authorizeExchange(exchanges -> exchanges
-                .pathMatchers("/auth/**").permitAll()
+                .pathMatchers(
+                    "/auth/**",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/webjars/**",
+                    "/*/doc/swagger-ui/**", 
+                    "/*/v3/api-docs/**",
+                    "/*/swagger-ui/**",
+                    "/*/doc/**"
+                ).permitAll()
+                
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
@@ -1822,14 +2363,28 @@ spring:
             - StripPrefix=1
 
         # =========================================================
-        # RECURSOS ESTÁTICOS DE SWAGGER (Webjars compartidos)
+        # PROVEEDOR-SERVICE (Puerto 9098)
         # =========================================================
-        - id: swagger-webjars
-          uri: http://cliente-service:9091
+        - id: proveedor-service
+          uri: http://proveedor-service:9098
           predicates:
-            - Path=/webjars/**
+            - Path=/proveedores/**, /api/v2/proveedores/**, /api/proveedores/**
           filters:
             - StripPrefix=0
+
+        - id: proveedor-service-api-docs
+          uri: http://proveedor-service:9098
+          predicates:
+            - Path=/proveedor-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: proveedor-service-swagger-ui
+          uri: http://proveedor-service:9098
+          predicates:
+            - Path=/proveedor-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1
 
 ================================================================================
 ARCHIVO: asistencia-service\HELP.md
@@ -2027,6 +2582,14 @@ ARCHIVO: asistencia-service\pom.xml
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
@@ -2854,6 +3417,32 @@ public class DataLoader implements CommandLineRunner {
 
 
 ================================================================================
+ARCHIVO: asistencia-service\src\main\java\com\example\asistencia_service\assemblers\AsistenciaModelAssembler.java
+================================================================================
+
+package com.example.asistencia_service.assemblers;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
+
+import com.example.asistencia_service.controller.AsistenciaControllerV2;
+import com.example.asistencia_service.model.Asistencia;
+
+@Component
+public class AsistenciaModelAssembler implements RepresentationModelAssembler<Asistencia, EntityModel<Asistencia>> {
+
+    @Override
+    public EntityModel<Asistencia> toModel(Asistencia asistencia) {
+        return EntityModel.of(asistencia,
+                linkTo(methodOn(AsistenciaControllerV2.class).obtenerAsistencia(asistencia.getId())).withSelfRel(),
+                linkTo(methodOn(AsistenciaControllerV2.class).listarAsistencias()).withRel("asistencias"));
+    }
+}
+
+================================================================================
 ARCHIVO: asistencia-service\src\main\java\com\example\asistencia_service\config\LiquibaseConfig.java
 ================================================================================
 
@@ -2882,6 +3471,44 @@ public class LiquibaseConfig {
 
 
 ================================================================================
+ARCHIVO: asistencia-service\src\main\java\com\example\asistencia_service\config\SecurityConfig.java
+================================================================================
+
+package com.example.asistencia_service.config; 
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
+    }
+    @Bean
+    public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
+        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withSecretKey(
+            new javax.crypto.spec.SecretKeySpec("esta_es_mi_compleja_clave_secreta".getBytes(), "HMACSHA256")
+        ).build();
+    }
+}
+
+================================================================================
 ARCHIVO: asistencia-service\src\main\java\com\example\asistencia_service\config\SwaggerConfig.java
 ================================================================================
 
@@ -2892,6 +3519,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -2901,11 +3529,15 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
+        
         return new OpenAPI()
+                .addServersItem(new Server().url("http://localhost:9090"))
+                
                 .info(new Info()
-                        .title("Asistencia Service API")
+                        .title("Empleado Service API")
                         .version("1.0.0")
-                        .description("Servicio de control de asistencia y horas extra de empleados"))
+                        .description("Servicio de gestión de empleados"))
+                        
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName, new SecurityScheme()
@@ -2915,7 +3547,6 @@ public class SwaggerConfig {
                                 .bearerFormat("JWT")));
     }
 }
-
 
 ================================================================================
 ARCHIVO: asistencia-service\src\main\java\com\example\asistencia_service\config\WebClientConfig.java
@@ -2946,7 +3577,6 @@ package com.example.asistencia_service.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -2954,9 +3584,8 @@ import com.example.asistencia_service.dto.AsistenciaDTO;
 import com.example.asistencia_service.model.Asistencia;
 import com.example.asistencia_service.service.AsistenciaService;
 import jakarta.validation.Valid;
-import java.time.LocalDate;
+
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -2971,11 +3600,13 @@ public class AsistenciaController {
     }
 
     @PostMapping
-    public ResponseEntity<AsistenciaDTO> registrarAsistencia(@Valid @RequestBody AsistenciaDTO dto) {
-        logger.info("POST /asistencias - Registrando: idEmpleado={}", dto.getIdEmpleado());
-        Asistencia registrada = asistenciaService.registrar(dto.toModel());
-        logger.info("Asistencia registrada exitosamente id={}", registrada.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(AsistenciaDTO.fromModel(registrada));
+    public ResponseEntity<AsistenciaDTO> crearAsistencia(@Valid @RequestBody AsistenciaDTO dto) {
+        logger.info("POST /asistencias - Registrando asistencia");
+        
+        Asistencia nueva = asistenciaService.registrar(dto.toModel());
+        
+        logger.info("Asistencia registrada exitosamente id={}", nueva.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(AsistenciaDTO.fromModel(nueva));
     }
 
     @GetMapping
@@ -2987,49 +3618,102 @@ public class AsistenciaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AsistenciaDTO> obtenerAsistencia(@PathVariable Long id) {
-        logger.info("GET /asistencias/{} - Obteniendo asistencia", id);
-        return ResponseEntity.ok(AsistenciaDTO.fromModel(asistenciaService.buscarPorId(id)));
-    }
-
-    @GetMapping("/empleado/{idEmpleado}")
-    public ResponseEntity<List<AsistenciaDTO>> obtenerPorEmpleado(@PathVariable Long idEmpleado) {
-        List<AsistenciaDTO> dtos = asistenciaService.buscarPorEmpleado(idEmpleado).stream()
-                .map(AsistenciaDTO::fromModel).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
-    }
-
-    @GetMapping("/fecha/{fecha}")
-    public ResponseEntity<List<AsistenciaDTO>> obtenerPorFecha(
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
-        List<AsistenciaDTO> dtos = asistenciaService.buscarPorFecha(fecha).stream()
-                .map(AsistenciaDTO::fromModel).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
-    }
-
-    @GetMapping("/empleado/{idEmpleado}/fecha/{fecha}")
-    public ResponseEntity<AsistenciaDTO> obtenerPorEmpleadoYFecha(
-            @PathVariable Long idEmpleado,
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
-        Optional<Asistencia> asistencia = asistenciaService.buscarPorEmpleadoYFecha(idEmpleado, fecha);
-        return asistencia.map(a -> ResponseEntity.ok(AsistenciaDTO.fromModel(a)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<AsistenciaDTO> obtenerPorId(@PathVariable Long id) {
+        logger.info("GET /asistencias/{} - Obteniendo registro de asistencia", id);
+        try {
+            Asistencia asistencia = asistenciaService.buscarPorId(id);
+            if (asistencia == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(AsistenciaDTO.fromModel(asistencia));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AsistenciaDTO> actualizarAsistencia(@PathVariable Long id, @Valid @RequestBody AsistenciaDTO dto) {
-        logger.info("PUT /asistencias/{} - Actualizando asistencia", id);
-        return ResponseEntity.ok(AsistenciaDTO.fromModel(asistenciaService.actualizar(id, dto.toModel())));
+    public ResponseEntity<AsistenciaDTO> actualizar(@PathVariable Long id, @Valid @RequestBody AsistenciaDTO dto) {
+        logger.info("PUT /asistencias/{} - Actualizando registro de asistencia", id);
+        try {
+            Asistencia actualizada = asistenciaService.actualizar(id, dto.toModel());
+            if (actualizada == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(AsistenciaDTO.fromModel(actualizada));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarAsistencia(@PathVariable Long id) {
-        logger.info("DELETE /asistencias/{} - Eliminando asistencia", id);
-        asistenciaService.eliminar(id);
-        return ResponseEntity.ok("Asistencia eliminada exitosamente");
+    public ResponseEntity<String> eliminar(@PathVariable Long id) {
+        logger.info("DELETE /asistencias/{} - Eliminando registro de asistencia", id);
+        try {
+            Asistencia asistencia = asistenciaService.buscarPorId(id);
+            if (asistencia == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Registro de asistencia no encontrado");
+            }
+            
+            asistenciaService.eliminar(id);
+            logger.info("Asistencia eliminada exitosamente id={}", id);
+            return ResponseEntity.ok("Asistencia eliminada exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar el registro de asistencia");
+        }
     }
 }
 
+================================================================================
+ARCHIVO: asistencia-service\src\main\java\com\example\asistencia_service\controller\AsistenciaControllerV2.java
+================================================================================
+
+package com.example.asistencia_service.controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.asistencia_service.assemblers.AsistenciaModelAssembler;
+import com.example.asistencia_service.model.Asistencia;
+import com.example.asistencia_service.service.AsistenciaService;
+
+@RestController
+@RequestMapping("asistencias/v2")
+public class AsistenciaControllerV2 {
+    private final AsistenciaService asistenciaService;
+    private final AsistenciaModelAssembler assembler;
+    private static final Logger logger = LoggerFactory.getLogger(AsistenciaControllerV2.class);
+
+    public AsistenciaControllerV2(AsistenciaService asistenciaService, AsistenciaModelAssembler assembler) {
+        this.asistenciaService = asistenciaService;
+        this.assembler = assembler;
+    }
+
+    @GetMapping
+    public CollectionModel<EntityModel<Asistencia>> listarAsistencias() {
+        logger.info("V2 GET /asistencias - Listando asistencias");
+        List<EntityModel<Asistencia>> asistencias = asistenciaService.listar().stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+        return CollectionModel.of(asistencias, linkTo(methodOn(AsistenciaControllerV2.class).listarAsistencias()).withSelfRel());
+    }
+
+    @GetMapping("/{id}")
+    public EntityModel<Asistencia> obtenerAsistencia(@PathVariable Long id) {
+        logger.info("V2 GET /asistencias/{} - Obteniendo asistencia", id);
+        Asistencia asistencia = asistenciaService.buscarPorId(id);
+        return assembler.toModel(asistencia);
+    }
+}
 
 ================================================================================
 ARCHIVO: asistencia-service\src\main\java\com\example\asistencia_service\dto\AsistenciaDTO.java
@@ -3719,7 +4403,11 @@ spring:
     name: asistencia-service
   profiles:
     active: dev
-
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
 ---
 spring:
   config:
@@ -3781,7 +4469,6 @@ logging:
 springdoc:
   swagger-ui:
     path: /doc/swagger-ui.html
-
 
 ================================================================================
 ARCHIVO: asistencia-service\src\main\resources\db\changelog-master.xml
@@ -4114,40 +4801,6 @@ class AsistenciaServiceTest {
 
 
 ================================================================================
-ARCHIVO: auth-service\HELP.md
-================================================================================
-
-# Getting Started
-
-### Reference Documentation
-For further reference, please consider the following sections:
-
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/3.5.7/maven-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/3.5.7/maven-plugin/build-image.html)
-* [Spring Web](https://docs.spring.io/spring-boot/3.5.7/reference/web/servlet.html)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/3.5.7/reference/data/sql.html#data.sql.jpa-and-spring-data)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/3.5.7/reference/using/devtools.html)
-
-### Guides
-The following guides illustrate how to use some features concretely:
-
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
-* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
-
-### Maven Parent overrides
-
-Due to Maven's design, elements are inherited from the parent POM to the project POM.
-While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
-To prevent this, the project POM contains empty overrides for these elements.
-If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
-
-
-
-================================================================================
 ARCHIVO: auth-service\pom.xml
 ================================================================================
 
@@ -4211,6 +4864,14 @@ ARCHIVO: auth-service\pom.xml
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
@@ -4362,6 +5023,44 @@ public class DemoApplication {
 
 }
 
+
+================================================================================
+ARCHIVO: auth-service\src\main\java\com\example\auth\config\SecurityConfig.java
+================================================================================
+
+package com.example.auth.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/**").permitAll()
+                
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
+                .anyRequest().authenticated()
+            );
+
+        return http.build();
+    }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
 
 ================================================================================
 ARCHIVO: auth-service\src\main\java\com\example\auth\config\SwaggerConfig.java
@@ -5144,52 +5843,6 @@ class UserServiceTest {
 
 
 ================================================================================
-ARCHIVO: cliente-service\HELP.md
-================================================================================
-
-# Read Me First
-The following was discovered as part of building this project:
-
-* The original package name 'com.example.cliente-service' is invalid and this project uses 'com.example.cliente_service' instead.
-
-# Getting Started
-
-### Reference Documentation
-For further reference, please consider the following sections:
-
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/4.0.5/maven-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/4.0.5/maven-plugin/build-image.html)
-* [Gateway](https://docs.spring.io/spring-cloud-gateway/reference/spring-cloud-gateway-server-webmvc.html)
-* [Spring Web](https://docs.spring.io/spring-boot/4.0.5/reference/web/servlet.html)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/4.0.5/reference/data/sql.html#data.sql.jpa-and-spring-data)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/4.0.5/reference/using/devtools.html)
-* [Rest Repositories](https://docs.spring.io/spring-boot/4.0.5/how-to/data-access.html#howto.data-access.exposing-spring-data-repositories-as-rest)
-* [Eureka Discovery Client](https://docs.spring.io/spring-cloud-netflix/reference/spring-cloud-netflix.html#_service_discovery_eureka_clients)
-
-### Guides
-The following guides illustrate how to use some features concretely:
-
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
-* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
-* [Accessing JPA Data with REST](https://spring.io/guides/gs/accessing-data-rest/)
-* [Accessing Neo4j Data with REST](https://spring.io/guides/gs/accessing-neo4j-data-rest/)
-* [Accessing MongoDB Data with REST](https://spring.io/guides/gs/accessing-mongodb-data-rest/)
-* [Service Registration and Discovery with Eureka and Spring Cloud](https://spring.io/guides/gs/service-registration-and-discovery/)
-
-### Maven Parent overrides
-
-Due to Maven's design, elements are inherited from the parent POM to the project POM.
-While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
-To prevent this, the project POM contains empty overrides for these elements.
-If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
-
-
-
-================================================================================
 ARCHIVO: cliente-service\pom.xml
 ================================================================================
 
@@ -5230,6 +5883,14 @@ ARCHIVO: cliente-service\pom.xml
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -5400,6 +6061,32 @@ public class ClienteServiceApplication {
 
 
 ================================================================================
+ARCHIVO: cliente-service\src\main\java\com\example\cliente_service\assemblers\ClienteModelAssembler.java
+================================================================================
+
+package com.example.cliente_service.assemblers;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
+
+import com.example.cliente_service.controller.ClienteControllerV2;
+import com.example.cliente_service.model.Cliente;
+
+@Component
+public class ClienteModelAssembler implements RepresentationModelAssembler<Cliente, EntityModel<Cliente>> {
+
+    @Override
+    public EntityModel<Cliente> toModel(Cliente cliente) {
+        return EntityModel.of(cliente,
+                linkTo(methodOn(ClienteControllerV2.class).obtenerCliente(cliente.getId())).withSelfRel(),
+                linkTo(methodOn(ClienteControllerV2.class).listarClientes()).withRel("clientes"));
+            }
+}
+
+================================================================================
 ARCHIVO: cliente-service\src\main\java\com\example\cliente_service\config\LiquibaseConfig.java
 ================================================================================
 
@@ -5425,6 +6112,44 @@ public class LiquibaseConfig {
 
 
 ================================================================================
+ARCHIVO: cliente-service\src\main\java\com\example\cliente_service\config\SecurityConfig.java
+================================================================================
+
+package com.example.cliente_service.config; 
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
+    }
+    @Bean
+    public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
+        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withSecretKey(
+            new javax.crypto.spec.SecretKeySpec("esta_es_mi_compleja_clave_secreta".getBytes(), "HMACSHA256")
+        ).build();
+    }
+}
+
+================================================================================
 ARCHIVO: cliente-service\src\main\java\com\example\cliente_service\config\SwaggerConfig.java
 ================================================================================
 
@@ -5435,6 +6160,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -5444,11 +6170,15 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
+        
         return new OpenAPI()
+                .addServersItem(new Server().url("http://localhost:9090"))
+                
                 .info(new Info()
-                        .title("Cliente Service API")
+                        .title("Empleado Service API")
                         .version("1.0.0")
-                        .description("Servicio de gestión de clientes de la pastelería"))
+                        .description("Servicio de gestión de empleados"))
+                        
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName, new SecurityScheme()
@@ -5458,7 +6188,6 @@ public class SwaggerConfig {
                                 .bearerFormat("JWT")));
     }
 }
-
 
 ================================================================================
 ARCHIVO: cliente-service\src\main\java\com\example\cliente_service\config\WebClientConfig.java
@@ -5495,6 +6224,7 @@ import com.example.cliente_service.dto.ClienteDTO;
 import com.example.cliente_service.model.Cliente;
 import com.example.cliente_service.service.ClienteService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -5529,23 +6259,44 @@ public class ClienteController {
     @GetMapping("/{id}")
     public ResponseEntity<ClienteDTO> obtenerPorId(@PathVariable Long id) {
         logger.info("GET /clientes/{} - Obteniendo cliente", id);
-        Cliente cliente = clienteService.buscarPorId(id);
-        return ResponseEntity.ok(ClienteDTO.fromModel(cliente));
+        try {
+            Cliente cliente = clienteService.buscarPorId(id);
+            if (cliente == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ClienteDTO.fromModel(cliente));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ClienteDTO> actualizar(@PathVariable Long id, @Valid @RequestBody ClienteDTO dto) {
         logger.info("PUT /clientes/{} - Actualizando cliente", id);
-        Cliente actualizado = clienteService.actualizar(id, dto.toModel());
-        return ResponseEntity.ok(ClienteDTO.fromModel(actualizado));
+        try {
+            Cliente actualizado = clienteService.actualizar(id, dto.toModel());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ClienteDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
         logger.info("DELETE /clientes/{} - Eliminando cliente", id);
-        clienteService.eliminar(id);
-        logger.info("Cliente eliminado exitosamente id={}", id);
-        return ResponseEntity.ok("Cliente eliminado exitosamente");
+        try {
+            if (!clienteService.existePorId(id)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado");
+            }
+            clienteService.eliminar(id);
+            logger.info("Cliente eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Cliente eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar");
+        }
     }
 
     @GetMapping("/total")
@@ -5557,7 +6308,15 @@ public class ClienteController {
     @GetMapping("/correo/{correo}")
     public ResponseEntity<ClienteDTO> buscarPorCorreo(@PathVariable String correo) {
         logger.info("GET /clientes/correo/{} - Buscando cliente", correo);
-        return ResponseEntity.ok(ClienteDTO.fromModel(clienteService.buscarPorCorreo(correo)));
+        try {
+            Cliente cliente = clienteService.buscarPorCorreo(correo);
+            if (cliente == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ClienteDTO.fromModel(cliente));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @GetMapping("/nombre/{nombre}")
@@ -5565,6 +6324,9 @@ public class ClienteController {
         logger.info("GET /clientes/nombre/{} - Buscando clientes", nombre);
         List<ClienteDTO> dtos = clienteService.buscarPorNombre(nombre).stream()
                 .map(ClienteDTO::fromModel).collect(Collectors.toList());
+        if (dtos.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.ok(dtos);
     }
 
@@ -5574,6 +6336,65 @@ public class ClienteController {
     }
 }
 
+================================================================================
+ARCHIVO: cliente-service\src\main\java\com\example\cliente_service\controller\ClienteControllerV2.java
+================================================================================
+
+package com.example.cliente_service.controller;
+
+import java.net.URI;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.cliente_service.assemblers.ClienteModelAssembler;
+import com.example.cliente_service.dto.ClienteDTO;
+import com.example.cliente_service.model.Cliente;
+import com.example.cliente_service.service.ClienteService;
+
+@RestController
+@RequestMapping("clientes/v2")
+public class ClienteControllerV2 {
+    private final ClienteService clienteService;
+    private final ClienteModelAssembler assembler;
+    private static final Logger logger = LoggerFactory.getLogger(ClienteControllerV2.class);
+
+    public ClienteControllerV2(ClienteService clienteService, ClienteModelAssembler assembler) {
+        this.clienteService = clienteService;
+        this.assembler = assembler;
+    }
+
+    @GetMapping
+    public CollectionModel<EntityModel<Cliente>> listarClientes() {
+        logger.info("V2 GET /clientes - Listando clientes");
+        List<EntityModel<Cliente>> clientes = clienteService.listar().stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+        return CollectionModel.of(clientes, linkTo(methodOn(ClienteControllerV2.class).listarClientes()).withSelfRel());
+    }
+
+    @GetMapping("/{id}")
+    public EntityModel<Cliente> obtenerCliente(@PathVariable Long id) {
+        logger.info("V2 GET /clientes/{} - Obteniendo cliente", id);
+        Cliente cliente = clienteService.buscarPorId(id);
+        return assembler.toModel(cliente);
+    }
+}
 
 ================================================================================
 ARCHIVO: cliente-service\src\main\java\com\example\cliente_service\dto\ClienteDTO.java
@@ -6035,6 +6856,12 @@ spring:
   profiles:
     active: dev
 
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
+
 ---
 spring:
   config:
@@ -6096,7 +6923,6 @@ logging:
 springdoc:
   swagger-ui:
     path: /doc/swagger-ui.html
-
 
 ================================================================================
 ARCHIVO: cliente-service\src\main\resources\db\changelog-master.xml
@@ -6596,6 +7422,14 @@ ARCHIVO: empleado-service\pom.xml
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
@@ -7244,6 +8078,32 @@ public class EmpleadoServiceApplication {
 
 
 ================================================================================
+ARCHIVO: empleado-service\src\main\java\com\example\empleado_service\assemblers\EmpleadoModelAssembler.java
+================================================================================
+
+package com.example.empleado_service.assemblers;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
+
+import com.example.empleado_service.controller.EmpleadoControllerV2;
+import com.example.empleado_service.model.Empleado;
+
+@Component
+public class EmpleadoModelAssembler implements RepresentationModelAssembler<Empleado, EntityModel<Empleado>> {
+
+    @Override
+    public EntityModel<Empleado> toModel(Empleado empleado) {
+        return EntityModel.of(empleado,
+                linkTo(methodOn(EmpleadoControllerV2.class).obtenerEmpleado(empleado.getId())).withSelfRel(),
+                linkTo(methodOn(EmpleadoControllerV2.class).listarEmpleados()).withRel("empleados"));
+    }
+}
+
+================================================================================
 ARCHIVO: empleado-service\src\main\java\com\example\empleado_service\config\LiquibaseConfig.java
 ================================================================================
 
@@ -7272,6 +8132,44 @@ public class LiquibaseConfig {
 
 
 ================================================================================
+ARCHIVO: empleado-service\src\main\java\com\example\empleado_service\config\SecurityConfig.java
+================================================================================
+
+package com.example.empleado_service.config; 
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
+    }
+    @Bean
+    public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
+        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withSecretKey(
+            new javax.crypto.spec.SecretKeySpec("esta_es_mi_compleja_clave_secreta".getBytes(), "HMACSHA256")
+        ).build();
+    }
+}
+
+================================================================================
 ARCHIVO: empleado-service\src\main\java\com\example\empleado_service\config\SwaggerConfig.java
 ================================================================================
 
@@ -7282,6 +8180,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -7291,11 +8190,15 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
+        
         return new OpenAPI()
+                .addServersItem(new Server().url("http://localhost:9090"))
+                
                 .info(new Info()
                         .title("Empleado Service API")
                         .version("1.0.0")
-                        .description("Servicio de gestión de empleados de la pastelería"))
+                        .description("Servicio de gestión de empleados"))
+                        
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName, new SecurityScheme()
@@ -7305,7 +8208,6 @@ public class SwaggerConfig {
                                 .bearerFormat("JWT")));
     }
 }
-
 
 ================================================================================
 ARCHIVO: empleado-service\src\main\java\com\example\empleado_service\config\WebClientConfig.java
@@ -7343,6 +8245,7 @@ import com.example.empleado_service.dto.EmpleadoDTO;
 import com.example.empleado_service.model.Empleado;
 import com.example.empleado_service.service.EmpleadoService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -7359,10 +8262,10 @@ public class EmpleadoController {
 
     @PostMapping
     public ResponseEntity<EmpleadoDTO> crearEmpleado(@Valid @RequestBody EmpleadoDTO dto) {
-        logger.info("POST /empleados - Creando empleado: nombre={}", dto.getNombre());
-        Empleado guardado = empleadoService.guardar(dto.toModel());
-        logger.info("Empleado creado exitosamente id={}", guardado.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(EmpleadoDTO.fromModel(guardado));
+        logger.info("POST /empleados - Creando empleado");
+        Empleado nuevo = empleadoService.guardar(dto.toModel());
+        logger.info("Empleado creado exitosamente id={}", nuevo.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(EmpleadoDTO.fromModel(nuevo));
     }
 
     @GetMapping
@@ -7370,50 +8273,106 @@ public class EmpleadoController {
         logger.info("GET /empleados - Listando empleados");
         List<EmpleadoDTO> dtos = empleadoService.listar().stream()
                 .map(EmpleadoDTO::fromModel).collect(Collectors.toList());
-        logger.info("Total empleados listados: {}", dtos.size());
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmpleadoDTO> obtenerEmpleado(@PathVariable Long id) {
+    public ResponseEntity<EmpleadoDTO> obtenerPorId(@PathVariable Long id) {
         logger.info("GET /empleados/{} - Obteniendo empleado", id);
-        return ResponseEntity.ok(EmpleadoDTO.fromModel(empleadoService.buscarPorId(id)));
-    }
-
-    @GetMapping("/rut/{rut}")
-    public ResponseEntity<EmpleadoDTO> obtenerEmpleadoPorRut(@PathVariable String rut) {
-        logger.info("GET /empleados/rut/{} - Buscando empleado", rut);
-        return ResponseEntity.ok(EmpleadoDTO.fromModel(empleadoService.buscarPorRut(rut)));
-    }
-
-    @GetMapping("/cargo/{cargo}")
-    public ResponseEntity<List<EmpleadoDTO>> obtenerEmpleadosPorCargo(@PathVariable String cargo) {
-        List<EmpleadoDTO> dtos = empleadoService.buscarPorCargo(cargo).stream()
-                .map(EmpleadoDTO::fromModel).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
-    }
-
-    @GetMapping("/activos")
-    public ResponseEntity<List<EmpleadoDTO>> listarActivos() {
-        List<EmpleadoDTO> dtos = empleadoService.listarActivos().stream()
-                .map(EmpleadoDTO::fromModel).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        try {
+            Empleado empleado = empleadoService.buscarPorId(id);
+            if (empleado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(EmpleadoDTO.fromModel(empleado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmpleadoDTO> actualizarEmpleado(@PathVariable Long id, @Valid @RequestBody EmpleadoDTO dto) {
+    public ResponseEntity<EmpleadoDTO> actualizar(@PathVariable Long id, @Valid @RequestBody EmpleadoDTO dto) {
         logger.info("PUT /empleados/{} - Actualizando empleado", id);
-        return ResponseEntity.ok(EmpleadoDTO.fromModel(empleadoService.actualizar(id, dto.toModel())));
+        try {
+            Empleado actualizado = empleadoService.actualizar(id, dto.toModel());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(EmpleadoDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarEmpleado(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(@PathVariable Long id) {
         logger.info("DELETE /empleados/{} - Eliminando empleado", id);
-        empleadoService.eliminar(id);
-        return ResponseEntity.ok("Empleado eliminado exitosamente");
+        try {
+            Empleado empleado = empleadoService.buscarPorId(id);
+            if (empleado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Empleado no encontrado");
+            }
+            
+            empleadoService.eliminar(id);
+            logger.info("Empleado eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Empleado eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar el empleado");
+        }
     }
 }
 
+================================================================================
+ARCHIVO: empleado-service\src\main\java\com\example\empleado_service\controller\EmpleadoControllerV2.java
+================================================================================
+
+package com.example.empleado_service.controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.empleado_service.assemblers.EmpleadoModelAssembler;
+import com.example.empleado_service.model.Empleado;
+import com.example.empleado_service.service.EmpleadoService;
+
+@RestController
+@RequestMapping("empleados/v2")
+public class EmpleadoControllerV2 {
+    private final EmpleadoService empleadoService;
+    private final EmpleadoModelAssembler assembler;
+    private static final Logger logger = LoggerFactory.getLogger(EmpleadoControllerV2.class);
+
+    public EmpleadoControllerV2(EmpleadoService empleadoService, EmpleadoModelAssembler assembler) {
+        this.empleadoService = empleadoService;
+        this.assembler = assembler;
+    }
+
+    @GetMapping
+    public CollectionModel<EntityModel<Empleado>> listarEmpleados() {
+        logger.info("V2 GET /empleados - Listando empleados");
+        List<EntityModel<Empleado>> empleados = empleadoService.listar().stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+        return CollectionModel.of(empleados, linkTo(methodOn(EmpleadoControllerV2.class).listarEmpleados()).withSelfRel());
+    }
+
+    @GetMapping("/{id}")
+    public EntityModel<Empleado> obtenerEmpleado(@PathVariable Long id) {
+        logger.info("V2 GET /empleados/{} - Obteniendo empleado", id);
+        Empleado empleado = empleadoService.buscarPorId(id);
+        return assembler.toModel(empleado);
+    }
+}
 
 ================================================================================
 ARCHIVO: empleado-service\src\main\java\com\example\empleado_service\dto\EmpleadoDTO.java
@@ -8049,6 +9008,12 @@ spring:
   profiles:
     active: dev
 
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
+
 ---
 spring:
   config:
@@ -8667,46 +9632,6 @@ logging.level.envio_service=DEBUG
 
 
 ================================================================================
-ARCHIVO: envio-service\HELP.md
-================================================================================
-
-# Read Me First
-The following was discovered as part of building this project:
-
-* The original package name 'com.example.envio-service' is invalid and this project uses 'com.example.envio_service' instead.
-
-# Getting Started
-
-### Reference Documentation
-For further reference, please consider the following sections:
-
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/4.0.5/maven-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/4.0.5/maven-plugin/build-image.html)
-* [Gateway](https://docs.spring.io/spring-cloud-gateway/reference/spring-cloud-gateway-server-webmvc.html)
-* [Spring Web](https://docs.spring.io/spring-boot/4.0.5/reference/web/servlet.html)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/4.0.5/reference/data/sql.html#data.sql.jpa-and-spring-data)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/4.0.5/reference/using/devtools.html)
-
-### Guides
-The following guides illustrate how to use some features concretely:
-
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
-* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
-
-### Maven Parent overrides
-
-Due to Maven's design, elements are inherited from the parent POM to the project POM.
-While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
-To prevent this, the project POM contains empty overrides for these elements.
-If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
-
-
-
-================================================================================
 ARCHIVO: envio-service\pom.xml
 ================================================================================
 
@@ -8732,6 +9657,14 @@ ARCHIVO: envio-service\pom.xml
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -9847,6 +10780,32 @@ public class EnvioServiceApplication {
 
 
 ================================================================================
+ARCHIVO: envio-service\src\main\java\com\example\envio_service\assemblers\EnvioModelAssembler.java
+================================================================================
+
+package com.example.envio_service.assemblers;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
+
+import com.example.envio_service.controller.EnvioControllerV2;
+import com.example.envio_service.model.Envio;
+
+@Component
+public class EnvioModelAssembler implements RepresentationModelAssembler<Envio, EntityModel<Envio>> {
+
+    @Override
+    public EntityModel<Envio> toModel(Envio envio) {
+        return EntityModel.of(envio,
+                linkTo(methodOn(EnvioControllerV2.class).obtenerEnvio(envio.getId())).withSelfRel(),
+                linkTo(methodOn(EnvioControllerV2.class).listarEnvios()).withRel("envios"));
+    }
+}
+
+================================================================================
 ARCHIVO: envio-service\src\main\java\com\example\envio_service\config\LiquibaseConfig.java
 ================================================================================
 
@@ -9876,6 +10835,44 @@ public class LiquibaseConfig {
 }
 
 ================================================================================
+ARCHIVO: envio-service\src\main\java\com\example\envio_service\config\SecurityConfig.java
+================================================================================
+
+package com.example.envio_service.config; 
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
+    }
+    @Bean
+    public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
+        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withSecretKey(
+            new javax.crypto.spec.SecretKeySpec("esta_es_mi_compleja_clave_secreta".getBytes(), "HMACSHA256")
+        ).build();
+    }
+}
+
+================================================================================
 ARCHIVO: envio-service\src\main\java\com\example\envio_service\config\SwaggerConfig.java
 ================================================================================
 
@@ -9886,6 +10883,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9895,11 +10893,15 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
+        
         return new OpenAPI()
+                .addServersItem(new Server().url("http://localhost:9090"))
+                
                 .info(new Info()
-                        .title("Envio Service API")
+                        .title("Empleado Service API")
                         .version("1.0.0")
-                        .description("Servicio de gestión de envíos y seguimiento de la pastelería"))
+                        .description("Servicio de gestión de empleados"))
+                        
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName, new SecurityScheme()
@@ -9909,7 +10911,6 @@ public class SwaggerConfig {
                                 .bearerFormat("JWT")));
     }
 }
-
 
 ================================================================================
 ARCHIVO: envio-service\src\main\java\com\example\envio_service\config\WebClientConfig.java
@@ -9947,6 +10948,7 @@ import com.example.envio_service.model.Envio;
 import com.example.envio_service.dto.EnvioDTO;
 import com.example.envio_service.service.EnvioService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -9973,41 +10975,77 @@ public class EnvioController {
     @GetMapping
     public ResponseEntity<List<EnvioDTO>> listar() {
         logger.info("GET /envios - Listando envios");
-        List<EnvioDTO> dtos = envioService.listar().stream().map(EnvioDTO::fromModel).collect(Collectors.toList());
+        List<EnvioDTO> dtos = envioService.listar().stream()
+                .map(EnvioDTO::fromModel).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EnvioDTO> obtenerPorId(@PathVariable Long id) {
         logger.info("GET /envios/{} - Obteniendo envio", id);
-        return ResponseEntity.ok(EnvioDTO.fromModel(envioService.buscarPorId(id)));
+        try {
+            Envio envio = envioService.buscarPorId(id);
+            if (envio == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(EnvioDTO.fromModel(envio));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @GetMapping("/cliente/{idCliente}")
     public ResponseEntity<List<EnvioDTO>> obtenerPorCliente(@PathVariable Long idCliente) {
-        List<EnvioDTO> dtos = envioService.buscarPorCliente(idCliente).stream().map(EnvioDTO::fromModel).collect(Collectors.toList());
+        logger.info("GET /envios/cliente/{} - Obteniendo envios por cliente", idCliente);
+        List<EnvioDTO> dtos = envioService.buscarPorCliente(idCliente).stream()
+                .map(EnvioDTO::fromModel).collect(Collectors.toList());
+        if (dtos.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/pedido/{idPedido}")
     public ResponseEntity<EnvioDTO> obtenerPorPedido(@PathVariable Long idPedido) {
-        Optional<Envio> envio = envioService.buscarPorPedido(idPedido);
-        return envio.map(e -> ResponseEntity.ok(EnvioDTO.fromModel(e)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        logger.info("GET /envios/pedido/{} - Obteniendo envio por pedido", idPedido);
+        try {
+            Optional<Envio> envio = envioService.buscarPorPedido(idPedido);
+            return envio.map(e -> ResponseEntity.ok(EnvioDTO.fromModel(e)))
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}/estado")
     public ResponseEntity<EnvioDTO> actualizarEstado(@PathVariable Long id, @RequestBody EstadoRequest request) {
         logger.info("PUT /envios/{}/estado - Actualizando a {}", id, request.getEstado());
-        Envio actualizado = envioService.actualizarEstado(id, request.getEstado());
-        return ResponseEntity.ok(EnvioDTO.fromModel(actualizado));
+        try {
+            Envio actualizado = envioService.actualizarEstado(id, request.getEstado());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(EnvioDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
         logger.info("DELETE /envios/{} - Eliminando envio", id);
-        envioService.eliminar(id);
-        return ResponseEntity.ok("Envio eliminado exitosamente");
+        try {
+            Envio envio = envioService.buscarPorId(id);
+            if (envio == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Envio no encontrado");
+            }
+            
+            envioService.eliminar(id);
+            logger.info("Envio eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Envio eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar el envio");
+        }
     }
 
     public static class EstadoRequest {
@@ -10019,6 +11057,57 @@ public class EnvioController {
     }
 }
 
+================================================================================
+ARCHIVO: envio-service\src\main\java\com\example\envio_service\controller\EnvioControllerV2.java
+================================================================================
+
+package com.example.envio_service.controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.envio_service.assemblers.EnvioModelAssembler;
+import com.example.envio_service.model.Envio;
+import com.example.envio_service.service.EnvioService;
+
+@RestController
+@RequestMapping("envios/v2")
+public class EnvioControllerV2 {
+    private final EnvioService envioService;
+    private final EnvioModelAssembler assembler;
+    private static final Logger logger = LoggerFactory.getLogger(EnvioControllerV2.class);
+
+    public EnvioControllerV2(EnvioService envioService, EnvioModelAssembler assembler) {
+        this.envioService = envioService;
+        this.assembler = assembler;
+    }
+
+    @GetMapping
+    public CollectionModel<EntityModel<Envio>> listarEnvios() {
+        logger.info("V2 GET /envios - Listando envios");
+        List<EntityModel<Envio>> envios = envioService.listar().stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+        return CollectionModel.of(envios, linkTo(methodOn(EnvioControllerV2.class).listarEnvios()).withSelfRel());
+    }
+
+    @GetMapping("/{id}")
+    public EntityModel<Envio> obtenerEnvio(@PathVariable Long id) {
+        logger.info("V2 GET /envios/{} - Obteniendo envio", id);
+        Envio envio = envioService.buscarPorId(id);
+        return assembler.toModel(envio);
+    }
+}
 
 ================================================================================
 ARCHIVO: envio-service\src\main\java\com\example\envio_service\dto\ClienteDTO.java
@@ -10720,7 +11809,11 @@ spring:
     name: envio-service
   profiles:
     active: dev
-
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
 ---
 spring:
   config:
@@ -11074,52 +12167,6 @@ class EnvioServiceTest {
 
 
 ================================================================================
-ARCHIVO: pedido-service\HELP.md
-================================================================================
-
-# Read Me First
-The following was discovered as part of building this project:
-
-* The original package name 'com.example.pedido-service' is invalid and this project uses 'com.example.pedido_service' instead.
-
-# Getting Started
-
-### Reference Documentation
-For further reference, please consider the following sections:
-
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/4.0.5/maven-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/4.0.5/maven-plugin/build-image.html)
-* [Gateway](https://docs.spring.io/spring-cloud-gateway/reference/spring-cloud-gateway-server-webmvc.html)
-* [Spring Web](https://docs.spring.io/spring-boot/4.0.5/reference/web/servlet.html)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/4.0.5/reference/data/sql.html#data.sql.jpa-and-spring-data)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/4.0.5/reference/using/devtools.html)
-* [Rest Repositories](https://docs.spring.io/spring-boot/4.0.5/how-to/data-access.html#howto.data-access.exposing-spring-data-repositories-as-rest)
-* [Eureka Discovery Client](https://docs.spring.io/spring-cloud-netflix/reference/spring-cloud-netflix.html#_service_discovery_eureka_clients)
-
-### Guides
-The following guides illustrate how to use some features concretely:
-
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
-* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
-* [Accessing JPA Data with REST](https://spring.io/guides/gs/accessing-data-rest/)
-* [Accessing Neo4j Data with REST](https://spring.io/guides/gs/accessing-neo4j-data-rest/)
-* [Accessing MongoDB Data with REST](https://spring.io/guides/gs/accessing-mongodb-data-rest/)
-* [Service Registration and Discovery with Eureka and Spring Cloud](https://spring.io/guides/gs/service-registration-and-discovery/)
-
-### Maven Parent overrides
-
-Due to Maven's design, elements are inherited from the parent POM to the project POM.
-While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
-To prevent this, the project POM contains empty overrides for these elements.
-If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
-
-
-
-================================================================================
 ARCHIVO: pedido-service\pom.xml
 ================================================================================
 
@@ -11167,6 +12214,14 @@ ARCHIVO: pedido-service\pom.xml
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -11915,6 +12970,32 @@ public class PedidoServiceApplication {
 
 
 ================================================================================
+ARCHIVO: pedido-service\src\main\java\com\example\pedido_service\assemblers\PedidoModelAssembler.java
+================================================================================
+
+package com.example.pedido_service.assemblers;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
+
+import com.example.pedido_service.controller.PedidoControllerV2;
+import com.example.pedido_service.model.Pedido;
+
+@Component
+public class PedidoModelAssembler implements RepresentationModelAssembler<Pedido, EntityModel<Pedido>> {
+
+    @Override
+    public EntityModel<Pedido> toModel(Pedido pedido) {
+        return EntityModel.of(pedido,
+                linkTo(methodOn(PedidoControllerV2.class).obtenerPedido(pedido.getId())).withSelfRel(),
+                linkTo(methodOn(PedidoControllerV2.class).listarPedidos()).withRel("pedidos"));
+    }
+}
+
+================================================================================
 ARCHIVO: pedido-service\src\main\java\com\example\pedido_service\config\LiquibaseConfig.java
 ================================================================================
 
@@ -11945,6 +13026,44 @@ public class LiquibaseConfig {
 
 
 ================================================================================
+ARCHIVO: pedido-service\src\main\java\com\example\pedido_service\config\SecurityConfig.java
+================================================================================
+
+package com.example.pedido_service.config; 
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
+    }
+    @Bean
+    public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
+        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withSecretKey(
+            new javax.crypto.spec.SecretKeySpec("esta_es_mi_compleja_clave_secreta".getBytes(), "HMACSHA256")
+        ).build();
+    }
+}
+
+================================================================================
 ARCHIVO: pedido-service\src\main\java\com\example\pedido_service\config\SwaggerConfig.java
 ================================================================================
 
@@ -11955,6 +13074,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11964,11 +13084,15 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
+        
         return new OpenAPI()
+                .addServersItem(new Server().url("http://localhost:9090"))
+                
                 .info(new Info()
-                        .title("Pedido Service API")
+                        .title("Empleado Service API")
                         .version("1.0.0")
-                        .description("Servicio de gestión de pedidos de la pastelería"))
+                        .description("Servicio de gestión de empleados"))
+                        
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName, new SecurityScheme()
@@ -11978,7 +13102,6 @@ public class SwaggerConfig {
                                 .bearerFormat("JWT")));
     }
 }
-
 
 ================================================================================
 ARCHIVO: pedido-service\src\main\java\com\example\pedido_service\config\WebClientConfig.java
@@ -12014,6 +13137,7 @@ import com.example.pedido_service.dto.PedidoDTO;
 import com.example.pedido_service.model.Pedido;
 import com.example.pedido_service.service.PedidoService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12029,9 +13153,9 @@ public class PedidoController {
     }
 
     @PostMapping
-    public ResponseEntity<PedidoDTO> crearPedido(@Valid @RequestBody PedidoDTO pedidoDto) {
-        logger.info("POST /pedidos - Creando pedido: idCliente={}", pedidoDto.getIdCliente());
-        Pedido nuevo = pedidoService.guardar(pedidoDto.toModel());
+    public ResponseEntity<PedidoDTO> crearPedido(@Valid @RequestBody PedidoDTO dto) {
+        logger.info("POST /pedidos - Creando pedido");
+        Pedido nuevo = pedidoService.guardar(dto.toModel());
         logger.info("Pedido creado exitosamente id={}", nuevo.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(PedidoDTO.fromModel(nuevo));
     }
@@ -12041,42 +13165,107 @@ public class PedidoController {
         logger.info("GET /pedidos - Listando pedidos");
         List<PedidoDTO> dtos = pedidoService.listar().stream()
                 .map(PedidoDTO::fromModel).collect(Collectors.toList());
-        logger.info("Total pedidos listados: {}", dtos.size());
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PedidoDTO> obtenerPorId(@PathVariable Long id) {
         logger.info("GET /pedidos/{} - Obteniendo pedido", id);
-        return ResponseEntity.ok(PedidoDTO.fromModel(pedidoService.buscarPorId(id)));
-    }
-
-    @GetMapping("/cliente/{idCliente}")
-    public ResponseEntity<List<PedidoDTO>> obtenerPorCliente(@PathVariable Long idCliente) {
-        List<PedidoDTO> dtos = pedidoService.buscarPorIdCliente(idCliente).stream()
-                .map(PedidoDTO::fromModel).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        try {
+            Pedido pedido = pedidoService.buscarPorId(id);
+            if (pedido == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(PedidoDTO.fromModel(pedido));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PedidoDTO> actualizar(@PathVariable Long id, @Valid @RequestBody PedidoDTO dto) {
         logger.info("PUT /pedidos/{} - Actualizando pedido", id);
-        return ResponseEntity.ok(PedidoDTO.fromModel(pedidoService.actualizar(id, dto.toModel())));
+        try {
+            Pedido actualizado = pedidoService.actualizar(id, dto.toModel());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(PedidoDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
         logger.info("DELETE /pedidos/{} - Eliminando pedido", id);
-        pedidoService.eliminar(id);
-        return ResponseEntity.ok("Pedido eliminado exitosamente");
-    }
-
-    @GetMapping("/total")
-    public ResponseEntity<Long> obtenerTotalPedidos() {
-        return ResponseEntity.ok((long) pedidoService.listar().size());
+        try {
+            // Usamos buscarPorId en lugar de existePorId para evitar el error de compilación
+            Pedido pedido = pedidoService.buscarPorId(id);
+            if (pedido == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pedido no encontrado");
+            }
+            
+            pedidoService.eliminar(id);
+            logger.info("Pedido eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Pedido eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar el pedido");
+        }
     }
 }
 
+================================================================================
+ARCHIVO: pedido-service\src\main\java\com\example\pedido_service\controller\PedidoControllerV2.java
+================================================================================
+
+package com.example.pedido_service.controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.pedido_service.assemblers.PedidoModelAssembler;
+import com.example.pedido_service.model.Pedido;
+import com.example.pedido_service.service.PedidoService;
+
+@RestController
+@RequestMapping("pedidos/v2")
+public class PedidoControllerV2 {
+    private final PedidoService pedidoService;
+    private final PedidoModelAssembler assembler;
+    private static final Logger logger = LoggerFactory.getLogger(PedidoControllerV2.class);
+
+    public PedidoControllerV2(PedidoService pedidoService, PedidoModelAssembler assembler) {
+        this.pedidoService = pedidoService;
+        this.assembler = assembler;
+    }
+
+    @GetMapping
+    public CollectionModel<EntityModel<Pedido>> listarPedidos() {
+        logger.info("V2 GET /pedidos - Listando pedidos");
+        List<EntityModel<Pedido>> pedidos = pedidoService.listar().stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+        return CollectionModel.of(pedidos, linkTo(methodOn(PedidoControllerV2.class).listarPedidos()).withSelfRel());
+    }
+
+    @GetMapping("/{id}")
+    public EntityModel<Pedido> obtenerPedido(@PathVariable Long id) {
+        logger.info("V2 GET /pedidos/{} - Obteniendo pedido", id);
+        Pedido pedido = pedidoService.buscarPorId(id);
+        return assembler.toModel(pedido);
+    }
+}
 
 ================================================================================
 ARCHIVO: pedido-service\src\main\java\com\example\pedido_service\dto\ClienteDTO.java
@@ -12849,7 +14038,11 @@ spring:
     name: pedido-service
   profiles:
     active: dev
-
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
 ---
 spring:
   config:
@@ -13514,233 +14707,179 @@ El endpoint `/productos/{id}/exists` sigue disponible para que **Pedido-Service*
 
 
 ================================================================================
-ARCHIVO: producto-service\HELP.md
-================================================================================
-
-# Read Me First
-The following was discovered as part of building this project:
-
-* The original package name 'com.example.producto-service' is invalid and this project uses 'com.example.producto_service' instead.
-
-# Getting Started
-
-### Reference Documentation
-For further reference, please consider the following sections:
-
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/4.0.5/maven-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/4.0.5/maven-plugin/build-image.html)
-* [Gateway](https://docs.spring.io/spring-cloud-gateway/reference/spring-cloud-gateway-server-webmvc.html)
-* [Spring Web](https://docs.spring.io/spring-boot/4.0.5/reference/web/servlet.html)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/4.0.5/reference/data/sql.html#data.sql.jpa-and-spring-data)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/4.0.5/reference/using/devtools.html)
-* [Rest Repositories](https://docs.spring.io/spring-boot/4.0.5/how-to/data-access.html#howto.data-access.exposing-spring-data-repositories-as-rest)
-* [Eureka Discovery Client](https://docs.spring.io/spring-cloud-netflix/reference/spring-cloud-netflix.html#_service_discovery_eureka_clients)
-
-### Guides
-The following guides illustrate how to use some features concretely:
-
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
-* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
-* [Accessing JPA Data with REST](https://spring.io/guides/gs/accessing-data-rest/)
-* [Accessing Neo4j Data with REST](https://spring.io/guides/gs/accessing-neo4j-data-rest/)
-* [Accessing MongoDB Data with REST](https://spring.io/guides/gs/accessing-mongodb-data-rest/)
-* [Service Registration and Discovery with Eureka and Spring Cloud](https://spring.io/guides/gs/service-registration-and-discovery/)
-
-### Maven Parent overrides
-
-Due to Maven's design, elements are inherited from the parent POM to the project POM.
-While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
-To prevent this, the project POM contains empty overrides for these elements.
-If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
-
-
-
-================================================================================
 ARCHIVO: producto-service\pom.xml
 ================================================================================
 
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>producto-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
-	<properties>
-		<java.version>21</java.version>
-		<spring-cloud.version>2025.1.1</spring-cloud.version>
-	</properties>
-	<dependencies>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.5</version>
+        <relativePath/> </parent>
+    <groupId>com.example</groupId>
+    <artifactId>producto-service</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>producto-service</name>
+    <description>Microservicio de productos</description>
+    <properties>
+        <java.version>21</java.version>
+        <spring-cloud.version>2025.1.1</spring-cloud.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-rest</artifactId>
+        </dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-rest</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.mysql</groupId>
-			<artifactId>mysql-connector-j</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-    <!-- Liquibase -->
-    <dependency>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-core</artifactId>
-    </dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>3.0.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-hateoas</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>
-		</dependency>
-	</dependencies>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>21</source>
-					<target>21</target>
-					<release>21</release>
-				</configuration>
-				<executions>
-					<execution>
-						<id>default-compile</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-						<configuration>
-							<annotationProcessorPaths>
-								<path>
-									<groupId>org.projectlombok</groupId>
-									<artifactId>lombok</artifactId>
-								</path>
-							</annotationProcessorPaths>
-						</configuration>
-					</execution>
-					<execution>
-						<id>default-testCompile</id>
-						<phase>test-compile</phase>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-						<configuration>
-							<annotationProcessorPaths>
-								<path>
-									<groupId>org.projectlombok</groupId>
-									<artifactId>lombok</artifactId>
-								</path>
-							</annotationProcessorPaths>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-hateoas</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+    </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <release>21</release>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
-
 
 ================================================================================
 ARCHIVO: producto-service\PRUEBAS.md
@@ -14492,6 +15631,32 @@ public class ProductoServiceApplication {
 
 
 ================================================================================
+ARCHIVO: producto-service\src\main\java\com\example\producto_service\assemblers\ProductoModelAssembler.java
+================================================================================
+
+package com.example.producto_service.assemblers;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
+
+import com.example.producto_service.controller.ProductoControllerV2;
+import com.example.producto_service.model.Producto;
+
+@Component
+public class ProductoModelAssembler implements RepresentationModelAssembler<Producto, EntityModel<Producto>> {
+
+    @Override
+    public EntityModel<Producto> toModel(Producto producto) {
+        return EntityModel.of(producto,
+                linkTo(methodOn(ProductoControllerV2.class).obtenerProducto(producto.getId())).withSelfRel(),
+                linkTo(methodOn(ProductoControllerV2.class).listarProductos()).withRel("productos"));
+    }
+}
+
+================================================================================
 ARCHIVO: producto-service\src\main\java\com\example\producto_service\config\LiquibaseConfig.java
 ================================================================================
 
@@ -14515,6 +15680,44 @@ public class LiquibaseConfig {
 }
 
 ================================================================================
+ARCHIVO: producto-service\src\main\java\com\example\producto_service\config\SecurityConfig.java
+================================================================================
+
+package com.example.producto_service.config; 
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
+    }
+    @Bean
+    public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
+        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withSecretKey(
+            new javax.crypto.spec.SecretKeySpec("esta_es_mi_compleja_clave_secreta".getBytes(), "HMACSHA256")
+        ).build();
+    }
+}
+
+================================================================================
 ARCHIVO: producto-service\src\main\java\com\example\producto_service\config\SwaggerConfig.java
 ================================================================================
 
@@ -14525,6 +15728,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14534,11 +15738,15 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
+        
         return new OpenAPI()
+                .addServersItem(new Server().url("http://localhost:9090"))
+                
                 .info(new Info()
-                        .title("Producto Service API")
+                        .title("Empleado Service API")
                         .version("1.0.0")
-                        .description("Servicio de gestión de productos y detalles de la pastelería"))
+                        .description("Servicio de gestión de empleados"))
+                        
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName, new SecurityScheme()
@@ -14548,7 +15756,6 @@ public class SwaggerConfig {
                                 .bearerFormat("JWT")));
     }
 }
-
 
 ================================================================================
 ARCHIVO: producto-service\src\main\java\com\example\producto_service\controller\ProductoController.java
@@ -14562,10 +15769,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.producto_service.dto.ProductoDTO;
-import com.example.producto_service.dto.DetalleProductoDTO;
 import com.example.producto_service.model.Producto;
 import com.example.producto_service.service.ProductoService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14581,9 +15788,9 @@ public class ProductoController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductoDTO> crearProducto(@Valid @RequestBody ProductoDTO productoDto) {
-        logger.info("POST /productos - Creando producto: nombre={}", productoDto.getNombre());
-        Producto nuevo = productoService.guardar(productoDto.toModel());
+    public ResponseEntity<ProductoDTO> crearProducto(@Valid @RequestBody ProductoDTO dto) {
+        logger.info("POST /productos - Creando producto");
+        Producto nuevo = productoService.guardar(dto.toModel());
         logger.info("Producto creado exitosamente id={}", nuevo.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ProductoDTO.fromModel(nuevo));
     }
@@ -14593,42 +15800,106 @@ public class ProductoController {
         logger.info("GET /productos - Listando productos");
         List<ProductoDTO> dtos = productoService.listar().stream()
                 .map(ProductoDTO::fromModel).collect(Collectors.toList());
-        logger.info("Total productos listados: {}", dtos.size());
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductoDTO> obtenerPorId(@PathVariable Long id) {
         logger.info("GET /productos/{} - Obteniendo producto", id);
-        return ResponseEntity.ok(ProductoDTO.fromModel(productoService.buscarPorId(id)));
-    }
-
-    @GetMapping("/{id}/detalles")
-    public ResponseEntity<DetalleProductoDTO> obtenerDetalleProducto(@PathVariable Long id) {
-        logger.info("GET /productos/{}/detalles - Obteniendo detalle", id);
-        Producto producto = productoService.buscarPorId(id);
-        return ResponseEntity.ok(DetalleProductoDTO.fromModel(producto.getDetalleProducto()));
+        try {
+            Producto producto = productoService.buscarPorId(id);
+            if (producto == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ProductoDTO.fromModel(producto));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductoDTO> actualizar(@PathVariable Long id, @Valid @RequestBody ProductoDTO dto) {
         logger.info("PUT /productos/{} - Actualizando producto", id);
-        return ResponseEntity.ok(ProductoDTO.fromModel(productoService.actualizar(id, dto.toModel())));
+        try {
+            Producto actualizado = productoService.actualizar(id, dto.toModel());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ProductoDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
         logger.info("DELETE /productos/{} - Eliminando producto", id);
-        productoService.eliminar(id);
-        return ResponseEntity.ok("Producto eliminado exitosamente");
-    }
-
-    @GetMapping("/{id}/exists")
-    public ResponseEntity<Boolean> existeProducto(@PathVariable Long id) {
-        return ResponseEntity.ok(productoService.existePorId(id));
+        try {
+            Producto producto = productoService.buscarPorId(id);
+            if (producto == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Producto no encontrado");
+            }
+            
+            productoService.eliminar(id);
+            logger.info("Producto eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Producto eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar el producto");
+        }
     }
 }
 
+================================================================================
+ARCHIVO: producto-service\src\main\java\com\example\producto_service\controller\ProductoControllerV2.java
+================================================================================
+
+package com.example.producto_service.controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.producto_service.assemblers.ProductoModelAssembler;
+import com.example.producto_service.model.Producto;
+import com.example.producto_service.service.ProductoService;
+
+@RestController
+@RequestMapping("productos/v2")
+public class ProductoControllerV2 {
+    private final ProductoService productoService;
+    private final ProductoModelAssembler assembler;
+    private static final Logger logger = LoggerFactory.getLogger(ProductoControllerV2.class);
+
+    public ProductoControllerV2(ProductoService productoService, ProductoModelAssembler assembler) {
+        this.productoService = productoService;
+        this.assembler = assembler;
+    }
+
+    @GetMapping
+    public CollectionModel<EntityModel<Producto>> listarProductos() {
+        logger.info("V2 GET /productos - Listando productos");
+        List<EntityModel<Producto>> productos = productoService.listar().stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+        return CollectionModel.of(productos, linkTo(methodOn(ProductoControllerV2.class).listarProductos()).withSelfRel());
+    }
+
+    @GetMapping("/{id}")
+    public EntityModel<Producto> obtenerProducto(@PathVariable Long id) {
+        logger.info("V2 GET /productos/{} - Obteniendo producto", id);
+        Producto producto = productoService.buscarPorId(id);
+        return assembler.toModel(producto);
+    }
+}
 
 ================================================================================
 ARCHIVO: producto-service\src\main\java\com\example\producto_service\dto\DetalleProductoDTO.java
@@ -15151,7 +16422,11 @@ spring:
     name: producto-service
   profiles:
     active: dev
-
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
 ---
 spring:
   config:
@@ -15485,5 +16760,1326 @@ class ProductoServiceTest {
         assertThrows(ResourceNotFoundException.class,
                 () -> productoService.eliminar(99L));
         verify(productoRepository, never()).deleteById(anyLong());
+    }
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\pom.xml
+================================================================================
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.5</version>
+        <relativePath/>
+    </parent>
+    <groupId>com.example</groupId>
+    <artifactId>proveedor-service</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>proveedor-service</name>
+    <description>Microservicio de proveedores</description>
+    <properties>
+        <java.version>21</java.version>
+        <spring-cloud.version>2025.1.1</spring-cloud.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-hateoas</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <release>21</release>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\ProveedorServiceApplication.java
+================================================================================
+
+package com.example.proveedor_service;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ProveedorServiceApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ProveedorServiceApplication.class, args);
+	}
+
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\assemblers\ProveedorModelAssembler.java
+================================================================================
+
+package com.example.proveedor_service.assemblers;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import com.example.proveedor_service.controller.ProveedorControllerV2;
+import com.example.proveedor_service.model.Proveedor;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ProveedorModelAssembler implements RepresentationModelAssembler<Proveedor, EntityModel<Proveedor>> {
+
+    @Override
+    public EntityModel<Proveedor> toModel(Proveedor proveedor) {
+        return EntityModel.of(proveedor,
+                linkTo(methodOn(ProveedorControllerV2.class).obtenerProveedor(proveedor.getId())).withSelfRel(),
+                linkTo(methodOn(ProveedorControllerV2.class).listarProveedores()).withRel("proveedores"));
+    }
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\config\LiquibaseConfig.java
+================================================================================
+
+package com.example.proveedor_service.config;
+
+import liquibase.integration.spring.SpringLiquibase;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import javax.sql.DataSource;
+
+@Configuration
+public class LiquibaseConfig {
+    @Bean
+    public SpringLiquibase liquibase(DataSource dataSource) {
+        SpringLiquibase liquibase = new SpringLiquibase();
+        liquibase.setDataSource(dataSource);
+        liquibase.setChangeLog("classpath:db/changelog/db.changelog.sql");
+        liquibase.setShouldRun(true);
+        return liquibase;
+    }
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\config\SecurityConfig.java
+================================================================================
+
+package com.example.proveedor_service.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
+    }
+    @Bean
+    public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
+        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withSecretKey(
+            new javax.crypto.spec.SecretKeySpec("esta_es_mi_compleja_clave_secreta".getBytes(), "HMACSHA256")
+        ).build();
+    }
+}
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\config\SwaggerConfig.java
+================================================================================
+
+package com.example.proveedor_service.config;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        final String securitySchemeName = "bearerAuth";
+        
+        return new OpenAPI()
+                .addServersItem(new Server().url("http://localhost:9090"))
+                
+                .info(new Info()
+                        .title("Empleado Service API")
+                        .version("1.0.0")
+                        .description("Servicio de gestión de empleados"))
+                        
+                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
+                .components(new Components()
+                        .addSecuritySchemes(securitySchemeName, new SecurityScheme()
+                                .name(securitySchemeName)
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")));
+    }
+}
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\controller\ProveedorController.java
+================================================================================
+
+package com.example.proveedor_service.controller;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.example.proveedor_service.dto.ProveedorDTO;
+import com.example.proveedor_service.model.Proveedor;
+import com.example.proveedor_service.service.ProveedorService;
+import jakarta.validation.Valid;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/proveedores")
+public class ProveedorController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProveedorController.class);
+    private final ProveedorService proveedorService;
+
+    public ProveedorController(ProveedorService proveedorService) {
+        this.proveedorService = proveedorService;
+    }
+
+    @PostMapping
+    public ResponseEntity<ProveedorDTO> crearProveedor(@Valid @RequestBody ProveedorDTO dto) {
+        logger.info("POST /proveedores - Creando proveedor");
+        Proveedor nuevo = proveedorService.guardar(dto.toModel());
+        logger.info("Proveedor creado exitosamente id={}", nuevo.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(ProveedorDTO.fromModel(nuevo));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProveedorDTO>> listarProveedores() {
+        logger.info("GET /proveedores - Listando proveedores");
+        List<ProveedorDTO> dtos = proveedorService.listar().stream()
+                .map(ProveedorDTO::fromModel).collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProveedorDTO> obtenerPorId(@PathVariable Long id) {
+        logger.info("GET /proveedores/{} - Obteniendo proveedor", id);
+        try {
+            Proveedor proveedor = proveedorService.buscarPorId(id);
+            if (proveedor == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ProveedorDTO.fromModel(proveedor));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProveedorDTO> actualizar(@PathVariable Long id, @Valid @RequestBody ProveedorDTO dto) {
+        logger.info("PUT /proveedores/{} - Actualizando proveedor", id);
+        try {
+            Proveedor actualizado = proveedorService.actualizar(id, dto.toModel());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ProveedorDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> eliminar(@PathVariable Long id) {
+        logger.info("DELETE /proveedores/{} - Eliminando proveedor", id);
+        try {
+            Proveedor proveedor = proveedorService.buscarPorId(id);
+            if (proveedor == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Proveedor no encontrado");
+            }
+            
+            proveedorService.eliminar(id);
+            logger.info("Proveedor eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Proveedor eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar el proveedor");
+        }
+    }
+}
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\controller\ProveedorControllerV2.java
+================================================================================
+
+package com.example.proveedor_service.controller;
+
+import com.example.proveedor_service.assemblers.ProveedorModelAssembler;
+import com.example.proveedor_service.model.Proveedor;
+import com.example.proveedor_service.service.ProveedorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+@RestController
+@RequestMapping("proveedores/v2")
+public class ProveedorControllerV2 {
+
+    private final ProveedorService proveedorService;
+    private final ProveedorModelAssembler assembler;
+    private static final Logger logger = LoggerFactory.getLogger(ProveedorControllerV2.class);
+
+    public ProveedorControllerV2(ProveedorService proveedorService, ProveedorModelAssembler assembler) {
+        this.proveedorService = proveedorService;
+        this.assembler = assembler;
+    }
+
+    @GetMapping
+    public CollectionModel<EntityModel<Proveedor>> listarProveedores() {
+        logger.info("V2 GET /proveedores - Listando proveedores");
+        
+        List<EntityModel<Proveedor>> proveedores = proveedorService.listar().stream()
+                .map(proveedor -> assembler.toModel(proveedor))
+                .collect(Collectors.toList());
+                
+        return CollectionModel.of(proveedores,
+                linkTo(methodOn(ProveedorControllerV2.class).listarProveedores()).withSelfRel());
+    }
+
+    @GetMapping("/{id}")
+    public EntityModel<Proveedor> obtenerProveedor(@PathVariable Long id) {
+        logger.info("V2 GET /proveedores/{} - Obteniendo proveedor", id);
+        Proveedor proveedor = proveedorService.buscarPorId(id);
+        return assembler.toModel(proveedor);
+    }
+}
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\dto\ProveedorDTO.java
+================================================================================
+
+package com.example.proveedor_service.dto;
+
+import com.example.proveedor_service.model.Proveedor;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ProveedorDTO {
+
+    private Long id;
+
+    @NotBlank(message = "El nombre del proveedor es obligatorio")
+    private String nombre;
+
+    @NotBlank(message = "El RUT del proveedor es obligatorio")
+    private String rut;
+
+    @NotBlank(message = "El correo del proveedor es obligatorio")
+    @Email(message = "El correo debe tener un formato válido")
+    private String correo;
+
+    private String telefono;
+
+    private String direccion;
+
+    @NotNull(message = "El estado activo es obligatorio")
+    private Boolean activo;
+
+    @NotNull(message = "La fecha de registro es obligatoria")
+    private LocalDate fechaRegistro;
+
+    public Proveedor toModel() {
+        Proveedor proveedor = new Proveedor();
+        proveedor.setId(id);
+        proveedor.setNombre(nombre);
+        proveedor.setRut(rut);
+        proveedor.setCorreo(correo);
+        proveedor.setTelefono(telefono);
+        proveedor.setDireccion(direccion);
+        proveedor.setActivo(activo);
+        proveedor.setFechaRegistro(fechaRegistro);
+        return proveedor;
+    }
+
+    public static ProveedorDTO fromModel(Proveedor p) {
+        if (p == null) return null;
+        return new ProveedorDTO(
+            p.getId(),
+            p.getNombre(),
+            p.getRut(),
+            p.getCorreo(),
+            p.getTelefono(),
+            p.getDireccion(),
+            p.getActivo(),
+            p.getFechaRegistro()
+        );
+    }
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\exception\ApiErrorResponse.java
+================================================================================
+
+package com.example.proveedor_service.exception;
+
+import java.time.OffsetDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApiErrorResponse {
+    private OffsetDateTime timestamp;
+    private int status;
+    private String error;
+    private String message;
+    private String path;
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\exception\BadRequestException.java
+================================================================================
+
+package com.example.proveedor_service.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class BadRequestException extends RuntimeException {
+    public BadRequestException(String message) {
+        super(message);
+    }
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\exception\ExternalServiceException.java
+================================================================================
+
+package com.example.proveedor_service.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.BAD_GATEWAY)
+public class ExternalServiceException extends RuntimeException {
+    public ExternalServiceException(String message) {
+        super(message);
+    }
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\exception\GlobalExceptionHandler.java
+================================================================================
+
+package com.example.proveedor_service.exception;
+
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.time.OffsetDateTime;
+import java.util.stream.Collectors;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNotFound(
+            ResourceNotFoundException ex, HttpServletRequest request) {
+        logger.warn("ResourceNotFoundException: {}", ex.getMessage());
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error("Not Found")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleBadRequest(
+            BadRequestException ex, HttpServletRequest request) {
+        logger.warn("BadRequestException: {}", ex.getMessage());
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<ApiErrorResponse> handleExternalService(
+            ExternalServiceException ex, HttpServletRequest request) {
+        logger.error("ExternalServiceException: {}", ex.getMessage());
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.BAD_GATEWAY.value())
+                .error("Bad Gateway")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleValidation(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
+        String errores = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        logger.warn("Validation error: {}", errores);
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Validation Failed")
+                .message(errores)
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleGeneral(
+            Exception ex, HttpServletRequest request) {
+        logger.error("Exception no controlada: {}", ex.getMessage(), ex);
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error("Internal Server Error")
+                .message("Ha ocurrido un error interno")
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\exception\ResourceNotFoundException.java
+================================================================================
+
+package com.example.proveedor_service.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class ResourceNotFoundException extends RuntimeException {
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\model\Proveedor.java
+================================================================================
+
+package com.example.proveedor_service.model;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Proveedor {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank(message = "El nombre del proveedor es obligatorio")
+    private String nombre;
+
+    @NotBlank(message = "El RUT del proveedor es obligatorio")
+    @Column(unique = true)
+    private String rut;
+
+    @NotBlank(message = "El correo del proveedor es obligatorio")
+    @Email(message = "El correo debe tener un formato válido")
+    private String correo;
+
+    private String telefono;
+
+    private String direccion;
+
+    @NotNull(message = "El estado activo es obligatorio")
+    private Boolean activo;
+
+    @NotNull(message = "La fecha de registro es obligatoria")
+    private LocalDate fechaRegistro;
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\repository\ProveedorRepository.java
+================================================================================
+
+package com.example.proveedor_service.repository;
+
+import com.example.proveedor_service.model.Proveedor;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface ProveedorRepository extends JpaRepository<Proveedor, Long> {
+
+    Optional<Proveedor> findByRut(String rut);
+
+    List<Proveedor> findByActivo(Boolean activo);
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\java\com\example\proveedor_service\service\ProveedorService.java
+================================================================================
+
+package com.example.proveedor_service.service;
+
+import com.example.proveedor_service.exception.BadRequestException;
+import com.example.proveedor_service.exception.ResourceNotFoundException;
+import com.example.proveedor_service.model.Proveedor;
+import com.example.proveedor_service.repository.ProveedorRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ProveedorService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProveedorService.class);
+
+    private final ProveedorRepository proveedorRepository;
+
+    public ProveedorService(ProveedorRepository proveedorRepository) {
+        this.proveedorRepository = proveedorRepository;
+    }
+
+    public Proveedor guardar(Proveedor proveedor) {
+        logger.info("Guardando proveedor: nombre={}", proveedor.getNombre());
+        if (proveedorRepository.findByRut(proveedor.getRut()).isPresent()) {
+            throw new BadRequestException("Ya existe un proveedor con el RUT " + proveedor.getRut());
+        }
+        Proveedor guardado = proveedorRepository.save(proveedor);
+        logger.info("Proveedor guardado exitosamente id={}", guardado.getId());
+        return guardado;
+    }
+
+    public List<Proveedor> listar() {
+        logger.info("Listando todos los proveedores");
+        List<Proveedor> proveedores = proveedorRepository.findAll();
+        logger.info("Total proveedores: {}", proveedores.size());
+        return proveedores;
+    }
+
+    public List<Proveedor> listarActivos() {
+        logger.info("Listando proveedores activos");
+        List<Proveedor> activos = proveedorRepository.findByActivo(true);
+        logger.info("Total proveedores activos: {}", activos.size());
+        return activos;
+    }
+
+    public Proveedor buscarPorId(Long id) {
+        logger.info("Buscando proveedor id={}", id);
+        return proveedorRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Proveedor no encontrado id={}", id);
+                    return new ResourceNotFoundException("Proveedor con id " + id + " no encontrado");
+                });
+    }
+
+    public Proveedor buscarPorRut(String rut) {
+        logger.info("Buscando proveedor rut={}", rut);
+        return proveedorRepository.findByRut(rut)
+                .orElseThrow(() -> {
+                    logger.warn("Proveedor no encontrado rut={}", rut);
+                    return new ResourceNotFoundException("Proveedor con RUT " + rut + " no encontrado");
+                });
+    }
+
+    public boolean existePorId(Long id) {
+        return proveedorRepository.existsById(id);
+    }
+
+    public Proveedor actualizar(Long id, Proveedor detalles) {
+        logger.info("Actualizando proveedor id={}", id);
+        Proveedor proveedor = proveedorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Proveedor con id " + id + " no encontrado"));
+
+        if (!proveedor.getRut().equals(detalles.getRut())
+                && proveedorRepository.findByRut(detalles.getRut()).isPresent()) {
+            throw new BadRequestException("Ya existe un proveedor con el RUT " + detalles.getRut());
+        }
+
+        proveedor.setNombre(detalles.getNombre());
+        proveedor.setRut(detalles.getRut());
+        proveedor.setCorreo(detalles.getCorreo());
+        proveedor.setTelefono(detalles.getTelefono());
+        proveedor.setDireccion(detalles.getDireccion());
+        proveedor.setActivo(detalles.getActivo());
+        proveedor.setFechaRegistro(detalles.getFechaRegistro());
+
+        Proveedor actualizado = proveedorRepository.save(proveedor);
+        logger.info("Proveedor actualizado exitosamente id={}", id);
+        return actualizado;
+    }
+
+    public Proveedor cambiarEstado(Long id, Boolean activo) {
+        logger.info("Cambiando estado de proveedor id={} a activo={}", id, activo);
+        Proveedor proveedor = proveedorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Proveedor con id " + id + " no encontrado"));
+        proveedor.setActivo(activo);
+        Proveedor actualizado = proveedorRepository.save(proveedor);
+        logger.info("Estado de proveedor actualizado id={}", id);
+        return actualizado;
+    }
+
+    public void eliminar(Long id) {
+        logger.info("Eliminando proveedor id={}", id);
+        if (!proveedorRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Proveedor con id " + id + " no encontrado");
+        }
+        proveedorRepository.deleteById(id);
+        logger.info("Proveedor eliminado exitosamente id={}", id);
+    }
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\resources\application-docker.properties
+================================================================================
+
+# Perfil activo solo dentro de contenedores Docker.
+# Sobrescribe la conexion a la base de datos para que apunte al MySQL
+# del host (XAMPP) en lugar de localhost, ya que dentro de un contenedor
+# "localhost" se refiere al propio contenedor, no al equipo anfitrion.
+spring.datasource.url=jdbc:mysql://host.docker.internal:3306/bd_proveedor?createDatabaseIfNotExist=true
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\resources\application.properties
+================================================================================
+
+spring.application.name=proveedor-service
+server.port=9098
+
+spring.datasource.url=jdbc:mysql://localhost:3306/bd_proveedor?createDatabaseIfNotExist=true
+spring.datasource.username=root
+spring.datasource.password=
+
+spring.jpa.hibernate.ddl-auto=none
+#spring.jpa.hibernate.ddl-auto=update
+
+# Liquibase
+spring.liquibase.change-log=classpath:db/changelog-master.xml
+
+#spring.jpa.show-sql=true
+#spring.jpa.properties.hibernate.format_sql=true
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\resources\application.yml
+================================================================================
+
+spring:
+  application:
+    name: proveedor-service
+  profiles:
+    active: dev
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/bd_proveedor?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true
+
+server:
+  port: 9098
+
+logging:
+  level:
+    com.example.proveedor_service: DEBUG
+  file:
+    name: logs/proveedor-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:mysql://host.docker.internal:3306/bd_proveedor?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true
+
+server:
+  port: 9098
+
+logging:
+  level:
+    com.example.proveedor_service: INFO
+  file:
+    name: logs/proveedor-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\resources\db\changelog-master.xml
+================================================================================
+
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <include file="db/changelog/db.changelog.sql" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\main\resources\db\changelog\db.changelog.sql
+================================================================================
+
+--liquibase formatted sql
+
+--changeset author:1
+CREATE TABLE proveedor (
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre         VARCHAR(255) NOT NULL,
+    rut            VARCHAR(12)  NOT NULL UNIQUE,
+    correo         VARCHAR(255) NOT NULL,
+    telefono       VARCHAR(20),
+    direccion      VARCHAR(500),
+    activo         BOOLEAN      NOT NULL DEFAULT TRUE,
+    fecha_registro DATE         NOT NULL
+);
+
+--changeset author:2
+INSERT INTO proveedor (nombre, rut, correo, telefono, direccion, activo, fecha_registro) VALUES
+('Distribuidora Harinera El Molino Ltda.',  '76123456-7', 'ventas@elmolino.cl',       '+56912345001', 'Av. Panamericana 1200, Santiago',          TRUE,  '2022-03-10'),
+('Lácteos del Sur S.A.',                    '76234567-8', 'contacto@lacteosdelsur.cl', '+56912345002', 'Ruta 5 Sur Km 45, San Bernardo',           TRUE,  '2022-05-22'),
+('Huevos Frescos Arauco SpA',               '76345678-9', 'pedidos@huevosarauco.cl',   '+56912345003', 'Camino El Guindo 890, Arauco',             TRUE,  '2022-07-15'),
+('Chocolates Finos Belgique Ltda.',         '76456789-0', 'info@belgique.cl',          '+56912345004', 'Av. Vitacura 5432, Las Condes',            TRUE,  '2022-08-30'),
+('Azucarera Río Cautín S.A.',               '76567890-1', 'ventas@azucarerarcautin.cl','+56912345005', 'Calle Comercio 340, Temuco',               TRUE,  '2022-10-05'),
+('Frutales del Maipo SpA',                  '76678901-2', 'despachos@frutalesmaipo.cl','+56912345006', 'Parcela 12, Isla de Maipo',                FALSE, '2023-01-18'),
+('Esencias y Colorantes Gourmet Ltda.',     '76789012-3', 'soporte@ecgourmet.cl',      '+56912345007', 'Av. Independencia 678, Santiago',          TRUE,  '2023-02-27'),
+('Empaques y Packaging Confitería S.A.',    '76890123-4', 'ventas@empaquesconf.cl',    '+56912345008', 'Parque Industrial Quilicura, Nave 7',      TRUE,  '2023-04-11'),
+('Levaduras y Leudantes Del Valle SpA',     '76901234-5', 'pedidos@delvalle.cl',       '+56912345009', 'Calle Principal 220, Curicó',              TRUE,  '2023-06-03'),
+('Frutos Secos Premium Ltda.',              '77012345-6', 'info@frutossecos.cl',       '+56912345010', 'Los Conquistadores 1818, Providencia',     TRUE,  '2023-07-19'),
+('Cremas y Mantequillas Naturales SpA',     '77123456-7', 'despachos@cremasymanteq.cl','+56912345011', 'Av. Lo Espejo 456, Pudahuel',              TRUE,  '2023-09-08'),
+('Utensilios Pastelería Profesional Ltda.', '77234567-8', 'ventas@utensiliospro.cl',   '+56912345012', 'Merced 128 Local 4, Santiago Centro',      FALSE, '2024-01-14');
+
+================================================================================
+ARCHIVO: proveedor-service\src\test\java\com\example\proveedor_service\ProveedorServiceApplicationTests.java
+================================================================================
+
+package com.example.proveedor_service;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class ProveedorServiceApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
+
+
+================================================================================
+ARCHIVO: proveedor-service\src\test\java\com\example\proveedor_service\service\ProveedorServiceTest.java
+================================================================================
+
+package com.example.proveedor_service.service;
+
+import com.example.proveedor_service.exception.BadRequestException;
+import com.example.proveedor_service.exception.ResourceNotFoundException;
+import com.example.proveedor_service.model.Proveedor;
+import com.example.proveedor_service.repository.ProveedorRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class ProveedorServiceTest {
+
+    @Mock
+    private ProveedorRepository proveedorRepository;
+
+    @InjectMocks
+    private ProveedorService proveedorService;
+
+    private Proveedor proveedorValido;
+
+    @BeforeEach
+    void setUp() {
+        proveedorValido = new Proveedor();
+        proveedorValido.setId(1L);
+        proveedorValido.setNombre("Distribuidora El Trigal");
+        proveedorValido.setRut("76543210-9");
+        proveedorValido.setCorreo("contacto@eltrigal.cl");
+        proveedorValido.setTelefono("+56912345678");
+        proveedorValido.setDireccion("Av. Libertador 456, Santiago");
+        proveedorValido.setActivo(true);
+        proveedorValido.setFechaRegistro(LocalDate.of(2024, 1, 15));
+    }
+
+    @Test
+    void guardar_conRutNuevo_deberiaGuardarExitosamente() {
+        // Given
+        when(proveedorRepository.findByRut(proveedorValido.getRut())).thenReturn(Optional.empty());
+        when(proveedorRepository.save(proveedorValido)).thenReturn(proveedorValido);
+
+        // When
+        Proveedor resultado = proveedorService.guardar(proveedorValido);
+
+        // Then
+        assertNotNull(resultado);
+        assertEquals("Distribuidora El Trigal", resultado.getNombre());
+        verify(proveedorRepository, times(1)).save(proveedorValido);
+    }
+
+    @Test
+    void guardar_conRutDuplicado_deberiaLanzarBadRequestException() {
+        // Given
+        when(proveedorRepository.findByRut(proveedorValido.getRut())).thenReturn(Optional.of(proveedorValido));
+
+        // When / Then
+        BadRequestException ex = assertThrows(BadRequestException.class,
+                () -> proveedorService.guardar(proveedorValido));
+        assertTrue(ex.getMessage().contains(proveedorValido.getRut()));
+        verify(proveedorRepository, never()).save(any());
+    }
+
+    @Test
+    void listar_conProveedoresExistentes_deberiaRetornarListaCompleta() {
+        // Given
+        Proveedor otroProveedor = new Proveedor();
+        otroProveedor.setId(2L);
+        otroProveedor.setNombre("Lácteos del Sur");
+        when(proveedorRepository.findAll()).thenReturn(Arrays.asList(proveedorValido, otroProveedor));
+
+        // When
+        List<Proveedor> resultado = proveedorService.listar();
+
+        // Then
+        assertEquals(2, resultado.size());
+        verify(proveedorRepository, times(1)).findAll();
+    }
+
+    @Test
+    void listarActivos_deberiaRetornarSoloProveedoresActivos() {
+        // Given
+        when(proveedorRepository.findByActivo(true)).thenReturn(List.of(proveedorValido));
+
+        // When
+        List<Proveedor> resultado = proveedorService.listarActivos();
+
+        // Then
+        assertEquals(1, resultado.size());
+        assertTrue(resultado.get(0).getActivo());
+        verify(proveedorRepository, times(1)).findByActivo(true);
+    }
+
+    @Test
+    void buscarPorId_conIdExistente_deberiaRetornarProveedor() {
+        // Given
+        when(proveedorRepository.findById(1L)).thenReturn(Optional.of(proveedorValido));
+
+        // When
+        Proveedor resultado = proveedorService.buscarPorId(1L);
+
+        // Then
+        assertNotNull(resultado);
+        assertEquals("Distribuidora El Trigal", resultado.getNombre());
+    }
+
+    @Test
+    void buscarPorId_conIdInexistente_deberiaLanzarResourceNotFoundException() {
+        // Given
+        when(proveedorRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // When / Then
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
+                () -> proveedorService.buscarPorId(99L));
+        assertTrue(ex.getMessage().contains("99"));
+    }
+
+    @Test
+    void buscarPorRut_conRutExistente_deberiaRetornarProveedor() {
+        // Given
+        when(proveedorRepository.findByRut("76543210-9")).thenReturn(Optional.of(proveedorValido));
+
+        // When
+        Proveedor resultado = proveedorService.buscarPorRut("76543210-9");
+
+        // Then
+        assertNotNull(resultado);
+        assertEquals("76543210-9", resultado.getRut());
+    }
+
+    @Test
+    void buscarPorRut_conRutInexistente_deberiaLanzarResourceNotFoundException() {
+        // Given
+        when(proveedorRepository.findByRut("00000000-0")).thenReturn(Optional.empty());
+
+        // When / Then
+        assertThrows(ResourceNotFoundException.class,
+                () -> proveedorService.buscarPorRut("00000000-0"));
+    }
+
+    @Test
+    void existePorId_conIdExistente_deberiaRetornarTrue() {
+        // Given
+        when(proveedorRepository.existsById(1L)).thenReturn(true);
+
+        // When
+        boolean resultado = proveedorService.existePorId(1L);
+
+        // Then
+        assertTrue(resultado);
+    }
+
+    @Test
+    void actualizar_conIdExistente_deberiaActualizarProveedor() {
+        // Given
+        Proveedor datosNuevos = new Proveedor();
+        datosNuevos.setNombre("Distribuidora El Trigal Actualizada");
+        datosNuevos.setRut("76543210-9");
+        datosNuevos.setCorreo("nuevo@eltrigal.cl");
+        datosNuevos.setTelefono("+56987654321");
+        datosNuevos.setDireccion("Nueva Dirección 789");
+        datosNuevos.setActivo(true);
+        datosNuevos.setFechaRegistro(LocalDate.of(2024, 1, 15));
+
+        when(proveedorRepository.findById(1L)).thenReturn(Optional.of(proveedorValido));
+        when(proveedorRepository.save(any(Proveedor.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // When
+        Proveedor resultado = proveedorService.actualizar(1L, datosNuevos);
+
+        // Then
+        assertEquals("Distribuidora El Trigal Actualizada", resultado.getNombre());
+        assertEquals("nuevo@eltrigal.cl", resultado.getCorreo());
+        verify(proveedorRepository, times(1)).save(any(Proveedor.class));
+    }
+
+    @Test
+    void actualizar_conIdInexistente_deberiaLanzarResourceNotFoundException() {
+        // Given
+        when(proveedorRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // When / Then
+        assertThrows(ResourceNotFoundException.class,
+                () -> proveedorService.actualizar(99L, proveedorValido));
+        verify(proveedorRepository, never()).save(any());
+    }
+
+    @Test
+    void cambiarEstado_conIdExistente_deberiaActualizarEstado() {
+        // Given
+        when(proveedorRepository.findById(1L)).thenReturn(Optional.of(proveedorValido));
+        when(proveedorRepository.save(any(Proveedor.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // When
+        Proveedor resultado = proveedorService.cambiarEstado(1L, false);
+
+        // Then
+        assertFalse(resultado.getActivo());
+        verify(proveedorRepository, times(1)).save(any(Proveedor.class));
+    }
+
+    @Test
+    void eliminar_conIdExistente_deberiaEliminarProveedor() {
+        // Given
+        when(proveedorRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(proveedorRepository).deleteById(1L);
+
+        // When
+        proveedorService.eliminar(1L);
+
+        // Then
+        verify(proveedorRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void eliminar_conIdInexistente_deberiaLanzarResourceNotFoundException() {
+        // Given
+        when(proveedorRepository.existsById(99L)).thenReturn(false);
+
+        // When / Then
+        assertThrows(ResourceNotFoundException.class,
+                () -> proveedorService.eliminar(99L));
+        verify(proveedorRepository, never()).deleteById(anyLong());
     }
 }

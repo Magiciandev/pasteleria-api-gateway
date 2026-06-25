@@ -9,6 +9,7 @@ import com.example.cliente_service.dto.ClienteDTO;
 import com.example.cliente_service.model.Cliente;
 import com.example.cliente_service.service.ClienteService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,23 +44,44 @@ public class ClienteController {
     @GetMapping("/{id}")
     public ResponseEntity<ClienteDTO> obtenerPorId(@PathVariable Long id) {
         logger.info("GET /clientes/{} - Obteniendo cliente", id);
-        Cliente cliente = clienteService.buscarPorId(id);
-        return ResponseEntity.ok(ClienteDTO.fromModel(cliente));
+        try {
+            Cliente cliente = clienteService.buscarPorId(id);
+            if (cliente == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ClienteDTO.fromModel(cliente));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ClienteDTO> actualizar(@PathVariable Long id, @Valid @RequestBody ClienteDTO dto) {
         logger.info("PUT /clientes/{} - Actualizando cliente", id);
-        Cliente actualizado = clienteService.actualizar(id, dto.toModel());
-        return ResponseEntity.ok(ClienteDTO.fromModel(actualizado));
+        try {
+            Cliente actualizado = clienteService.actualizar(id, dto.toModel());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ClienteDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
         logger.info("DELETE /clientes/{} - Eliminando cliente", id);
-        clienteService.eliminar(id);
-        logger.info("Cliente eliminado exitosamente id={}", id);
-        return ResponseEntity.ok("Cliente eliminado exitosamente");
+        try {
+            if (!clienteService.existePorId(id)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente no encontrado");
+            }
+            clienteService.eliminar(id);
+            logger.info("Cliente eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Cliente eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar");
+        }
     }
 
     @GetMapping("/total")
@@ -71,7 +93,15 @@ public class ClienteController {
     @GetMapping("/correo/{correo}")
     public ResponseEntity<ClienteDTO> buscarPorCorreo(@PathVariable String correo) {
         logger.info("GET /clientes/correo/{} - Buscando cliente", correo);
-        return ResponseEntity.ok(ClienteDTO.fromModel(clienteService.buscarPorCorreo(correo)));
+        try {
+            Cliente cliente = clienteService.buscarPorCorreo(correo);
+            if (cliente == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ClienteDTO.fromModel(cliente));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @GetMapping("/nombre/{nombre}")
@@ -79,6 +109,9 @@ public class ClienteController {
         logger.info("GET /clientes/nombre/{} - Buscando clientes", nombre);
         List<ClienteDTO> dtos = clienteService.buscarPorNombre(nombre).stream()
                 .map(ClienteDTO::fromModel).collect(Collectors.toList());
+        if (dtos.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.ok(dtos);
     }
 

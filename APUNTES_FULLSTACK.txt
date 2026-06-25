@@ -1,0 +1,75 @@
+Limpiar peso del proyecto (Borrar carpetas target):
+mvn clean
+
+Ejecutar pruebas unitarias (Para demostrar calidad de código):
+./mvnw test
+
+Levantar TODOS los servicios (Docker):
+./build-all.bat
+
+Levantar un solo servicio manualmente (Si falla Docker):
+./mvnw.cmd spring-boot:run
+
+🗄️ REINICIO DE BASE DE DATOS (LIQUIBASE)
+
+Si hay errores de datos o quieres empezar en blanco, ejecuta esto
+en MySQL/phpMyAdmin y luego levanta el proyecto de nuevo:
+
+DROP DATABASE bd_cliente;
+DROP DATABASE bd_envio;
+DROP DATABASE bd_pedidos;
+DROP DATABASE bd_producto;
+DROP DATABASE bd_users;
+DROP DATABASE bd_empleado;
+DROP DATABASE bd_asistencia;
+DROP DATABASE bd_proveedor;
+
+🌐 URLs CLAVE (SWAGGER Y GATEWAY)
+
+TODO pasa por el puerto 9090 (API Gateway). No usar los puertos internos.
+
+Interfaz Visual de Swagger (Pruebas en vivo):
+http://localhost:9090/cliente-service/doc/swagger-ui/index.html
+(Cambiar "cliente-service/v3/api-docs" por "pedido-service/v3/api-docs", etc. según corresponda)
+
+JSON Crudo de Documentación (Si el profe lo pide para Postman):
+http://localhost:9090/cliente-service/v3/api-docs
+
+⚠️ CASO DE PRUEBA 1: EL PROFESOR PIDE CAMBIAR UNA RUTA
+ESCENARIO: "Cambia la ruta de 'GET /clientes/{id}' a 'GET /clientes/buscar/{id}'"
+
+PASO 1: Ir al controlador correspondiente (Ej: ClienteController.java)
+PASO 2: Buscar la anotación encima del método y modificarla.
+- ANTES: @GetMapping("/{id}")
+- DESPUÉS: @GetMapping("/buscar/{id}")
+PASO 3: Guardar el archivo.
+PASO 4: En la terminal, apagar el proyecto (Ctrl+C) y ejecutar:
+.\build-all.bat
+PASO 5: Ir a Swagger. El cambio se reflejará automáticamente y la ruta
+pasará por el Gateway de forma transparente.
+
+*Nota: Si el profe pide cambiar la ruta base de TODO el microservicio,
+se cambia el @RequestMapping("/clientes") que está arriba de "public class...".
+
+⚠️ CASO DE PRUEBA 2: EL PROFESOR AGREGA UN MICROSERVICIO NUEVO
+ESCENARIO: Te entrega un ZIP con un "inventario-service" y hay que sumarlo.
+
+PASO 1: RUTAS DEL GATEWAY (El "Peaje" obligatorio)
+Abrir: api-gateway/src/main/resources/application.yml
+Agregar en "routes:":
+- id: inventario-service
+uri: http://localhost:9096  <-- (El puerto que traiga el servicio nuevo)
+predicates:
+- Path=/inventarios/
+
+PASO 2: ARREGLAR EL SWAGGER DEL PROFE (Para que no de error CORS)
+Crear la clase "SwaggerConfig.java" en el nuevo servicio
+(ej: src/main/java/com/ejemplo/inventario/config/SwaggerConfig.java):
+se copia un swager y se cambia el package
+RECORDATORIO DE DEFENSA (BLINDAJE DE ERRORES)
+Si el profe pregunta: "¿Qué pasa si busco un ID que no existe?"
+Respuesta técnica: "El controlador está protegido con un bloque try-catch
+y validaciones de nulidad. En lugar de arrojar un Error 500 (Internal Server Error)
+y quebrar la aplicación, el servicio atrapa el nulo y responde de forma
+elegante con un ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+entregando un código 404 correcto según el estándar REST".

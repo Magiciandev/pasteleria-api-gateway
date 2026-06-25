@@ -183,11 +183,25 @@ spring:
             - StripPrefix=1
 
         # =========================================================
-        # RECURSOS ESTÁTICOS DE SWAGGER (Webjars compartidos)
+        # PROVEEDOR-SERVICE (Puerto 9098)
         # =========================================================
-        - id: swagger-webjars
-          uri: http://cliente-service:9091
+        - id: proveedor-service
+          uri: http://proveedor-service:9098
           predicates:
-            - Path=/webjars/**
+            - Path=/proveedores/**, /api/v2/proveedores/**, /api/proveedores/**
           filters:
             - StripPrefix=0
+
+        - id: proveedor-service-api-docs
+          uri: http://proveedor-service:9098
+          predicates:
+            - Path=/proveedor-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: proveedor-service-swagger-ui
+          uri: http://proveedor-service:9098
+          predicates:
+            - Path=/proveedor-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1

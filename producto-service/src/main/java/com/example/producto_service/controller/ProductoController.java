@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.producto_service.dto.ProductoDTO;
-import com.example.producto_service.dto.DetalleProductoDTO;
 import com.example.producto_service.model.Producto;
 import com.example.producto_service.service.ProductoService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,9 +25,9 @@ public class ProductoController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductoDTO> crearProducto(@Valid @RequestBody ProductoDTO productoDto) {
-        logger.info("POST /productos - Creando producto: nombre={}", productoDto.getNombre());
-        Producto nuevo = productoService.guardar(productoDto.toModel());
+    public ResponseEntity<ProductoDTO> crearProducto(@Valid @RequestBody ProductoDTO dto) {
+        logger.info("POST /productos - Creando producto");
+        Producto nuevo = productoService.guardar(dto.toModel());
         logger.info("Producto creado exitosamente id={}", nuevo.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ProductoDTO.fromModel(nuevo));
     }
@@ -37,38 +37,51 @@ public class ProductoController {
         logger.info("GET /productos - Listando productos");
         List<ProductoDTO> dtos = productoService.listar().stream()
                 .map(ProductoDTO::fromModel).collect(Collectors.toList());
-        logger.info("Total productos listados: {}", dtos.size());
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductoDTO> obtenerPorId(@PathVariable Long id) {
         logger.info("GET /productos/{} - Obteniendo producto", id);
-        return ResponseEntity.ok(ProductoDTO.fromModel(productoService.buscarPorId(id)));
-    }
-
-    @GetMapping("/{id}/detalles")
-    public ResponseEntity<DetalleProductoDTO> obtenerDetalleProducto(@PathVariable Long id) {
-        logger.info("GET /productos/{}/detalles - Obteniendo detalle", id);
-        Producto producto = productoService.buscarPorId(id);
-        return ResponseEntity.ok(DetalleProductoDTO.fromModel(producto.getDetalleProducto()));
+        try {
+            Producto producto = productoService.buscarPorId(id);
+            if (producto == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ProductoDTO.fromModel(producto));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductoDTO> actualizar(@PathVariable Long id, @Valid @RequestBody ProductoDTO dto) {
         logger.info("PUT /productos/{} - Actualizando producto", id);
-        return ResponseEntity.ok(ProductoDTO.fromModel(productoService.actualizar(id, dto.toModel())));
+        try {
+            Producto actualizado = productoService.actualizar(id, dto.toModel());
+            if (actualizado == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(ProductoDTO.fromModel(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
         logger.info("DELETE /productos/{} - Eliminando producto", id);
-        productoService.eliminar(id);
-        return ResponseEntity.ok("Producto eliminado exitosamente");
-    }
-
-    @GetMapping("/{id}/exists")
-    public ResponseEntity<Boolean> existeProducto(@PathVariable Long id) {
-        return ResponseEntity.ok(productoService.existePorId(id));
+        try {
+            Producto producto = productoService.buscarPorId(id);
+            if (producto == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Producto no encontrado");
+            }
+            
+            productoService.eliminar(id);
+            logger.info("Producto eliminado exitosamente id={}", id);
+            return ResponseEntity.ok("Producto eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error al eliminar el producto");
+        }
     }
 }
