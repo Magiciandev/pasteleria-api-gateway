@@ -19,6 +19,8 @@ services:
       - asistencia-service
       - envio-service
       - proveedor-service
+      - inventario-service
+      - compra-service
 
   auth-service:
     build: ./auth-service
@@ -100,3 +102,26 @@ services:
       <<: *common-env
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  inventario-service:
+    build: ./inventario-service
+    ports:
+      - "9099:9099"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - proveedor-service
+
+  compra-service:
+    build: ./compra-service
+    ports:
+      - "9100:9100"
+    environment:
+      <<: *common-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - proveedor-service
+      - inventario-service

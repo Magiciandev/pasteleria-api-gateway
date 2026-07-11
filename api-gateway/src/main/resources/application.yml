@@ -205,3 +205,51 @@ spring:
             - Path=/proveedor-service/doc/swagger-ui/**
           filters:
             - StripPrefix=1
+
+        # =========================================================
+        # INVENTARIO-SERVICE (Puerto 9099)
+        # =========================================================
+        - id: inventario-service
+          uri: http://inventario-service:9099
+          predicates:
+            - Path=/inventario/**, /api/v2/inventario/**, /api/inventario/**
+          filters:
+            - StripPrefix=0
+
+        - id: inventario-service-api-docs
+          uri: http://inventario-service:9099
+          predicates:
+            - Path=/inventario-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: inventario-service-swagger-ui
+          uri: http://inventario-service:9099
+          predicates:
+            - Path=/inventario-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1
+
+        # =========================================================
+        # COMPRA-SERVICE (Puerto 9100)
+        # =========================================================
+        - id: compra-service
+          uri: http://compra-service:9100
+          predicates:
+            - Path=/compras/**, /api/v2/compras/**, /api/compras/**
+          filters:
+            - StripPrefix=0
+
+        - id: compra-service-api-docs
+          uri: http://compra-service:9100
+          predicates:
+            - Path=/compra-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: compra-service-swagger-ui
+          uri: http://compra-service:9100
+          predicates:
+            - Path=/compra-service/doc/swagger-ui/**
+          filters:
+            - StripPrefix=1

@@ -1,5 +1,5 @@
 Limpiar peso del proyecto (Borrar carpetas target):
-mvn clean
+./mvn clean
 
 Ejecutar pruebas unitarias (Para demostrar calidad de código):
 ./mvnw test
@@ -23,6 +23,8 @@ DROP DATABASE bd_users;
 DROP DATABASE bd_empleado;
 DROP DATABASE bd_asistencia;
 DROP DATABASE bd_proveedor;
+DROP DATABASE bd_inventario;
+DROP DATABASE bd_compra;
 
 🌐 URLs CLAVE (SWAGGER Y GATEWAY)
 
@@ -30,7 +32,7 @@ TODO pasa por el puerto 9090 (API Gateway). No usar los puertos internos.
 
 Interfaz Visual de Swagger (Pruebas en vivo):
 http://localhost:9090/cliente-service/doc/swagger-ui/index.html
-(Cambiar "cliente-service/v3/api-docs" por "pedido-service/v3/api-docs", etc. según corresponda)
+(Cambiar "/cliente-service/v3/api-docs" por "/pedido-service/v3/api-docs", etc. según corresponda)
 
 JSON Crudo de Documentación (Si el profe lo pide para Postman):
 http://localhost:9090/cliente-service/v3/api-docs

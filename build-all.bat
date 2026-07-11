@@ -15,6 +15,12 @@ call .\mvnw clean package -DskipTests
 cd ..\empleado-service
 call .\mvnw clean package -DskipTests
 
+cd ..\inventario-service
+call .\mvnw clean package -DskipTests
+
+cd ..\compra-service
+call .\mvnw clean package -DskipTests
+
 cd ..\producto-service
 call .\mvnw clean package -DskipTests
 

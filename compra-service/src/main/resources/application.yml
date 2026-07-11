@@ -1,0 +1,83 @@
+spring:
+  application:
+    name: compra-service
+  profiles:
+    active: dev
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        secret-key: esta_es_mi_compleja_clave_secreta
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/bd_compra?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true
+
+server:
+  port: 9100
+
+logging:
+  level:
+    com.example.compra_service: DEBUG
+  file:
+    name: logs/compra-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html
+
+servicios:
+  proveedor:
+    url: http://localhost:9098
+  inventario:
+    url: http://localhost:9099
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:mysql://host.docker.internal:3306/bd_compra?createDatabaseIfNotExist=true
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true
+
+server:
+  port: 9100
+
+logging:
+  level:
+    com.example.compra_service: INFO
+  file:
+    name: logs/compra-service.log
+
+springdoc:
+  swagger-ui:
+    path: /doc/swagger-ui.html
+
+servicios:
+  proveedor:
+    url: http://proveedor-service:9098
+  inventario:
+    url: http://inventario-service:9099
